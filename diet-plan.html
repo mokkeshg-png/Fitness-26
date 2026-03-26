@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diet Plans - FitTrack</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .plan-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            padding: 40px;
+            border-radius: var(--radius);
+            color: white;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .plan-header::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 300px;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transform: translate(30%, -30%);
+        }
+
+        .plan-header h2 {
+            font-size: 2rem;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .plan-header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .meal-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .meal-card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 24px;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow-sm);
+            transition: transform var(--transition), box-shadow var(--transition);
+        }
+
+        .meal-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .meal-type {
+            display: inline-block;
+            padding: 4px 12px;
+            background: var(--primary-light);
+            color: var(--primary);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .meal-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 8px;
+        }
+
+        .meal-macros {
+            display: flex;
+            gap: 16px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(150, 150, 150, 0.1);
+        }
+
+        .macro-item {
+            display: flex;
+            flex-direction: column;
+            font-size: 0.9rem;
+        }
+
+        .macro-item strong {
+            font-family: var(--font-heading);
+            font-size: 1.1rem;
+        }
+
+        .macro-label {
+            color: var(--text-light);
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <a href="dashboard.html" class="brand">
+                <i class="fa-solid fa-heart-pulse brand-icon"></i>
+                <span>FitTrack</span>
+            </a>
+            
+            <nav class="sidebar-menu">
+                <a href="dashboard.html" class="menu-item">
+                    <i class="fa-solid fa-house"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="food-log.html" class="menu-item">
+                    <i class="fa-solid fa-utensils"></i>
+                    <span>Food Log</span>
+                </a>
+                <a href="workout-log.html" class="menu-item">
+                    <i class="fa-solid fa-dumbbell"></i>
+                    <span>Workouts</span>
+                </a>
+                <a href="progress.html" class="menu-item">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>Progress</span>
+                </a>
+                <a href="diet-plan.html" class="menu-item active">
+                    <i class="fa-solid fa-leaf"></i>
+                    <span>Diet Plans</span>
+                </a>
+                <a href="workout-plan.html" class="menu-item">
+                    <i class="fa-solid fa-person-running"></i>
+                    <span>Routines</span>
+                </a>
+                <a href="bmi-calculator.html" class="menu-item">
+                    <i class="fa-solid fa-calculator"></i>
+                    <span>BMI Calculator</span>
+                </a>
+                <a href="food-database.html" class="menu-item">
+                    <i class="fa-solid fa-book-open"></i>
+                    <span>Food Explorer</span>
+                </a>
+            </nav>
+
+            <div style="margin-top: auto;">
+                <a href="profile.html" class="menu-item">
+                    <i class="fa-solid fa-gear"></i>
+                    <span>Settings</span>
+                </a>
+                <a href="#" class="menu-item logout" onclick="api.logout()">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="page-header animate-fade-in-up">
+                <div class="page-title">
+                    <h1>Diet Plans 🥗</h1>
+                    <p>Personalized meal recommendations based on your unique goals.</p>
+                </div>
+                <div class="header-actions">
+                    <button type="button" class="theme-toggle" id="themeToggle">
+                        <i class="fa-solid fa-moon"></i>
+                    </button>
+                    <div class="profile-dropdown" onclick="window.location.href='profile.html'">
+                        <div class="avatar" id="userAvatar">U</div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="plan-header animate-fade-in-up" id="planHeader">
+                <h2>Generating your personalized plan...</h2>
+                <p>Based on your current goal and metrics.</p>
+            </div>
+
+            <div class="meal-grid" id="mealGrid">
+                <!-- Javascript will populate this based on user's goal -->
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/api.js"></script>
+    <script src="js/utils.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = api.getCurrentUser();
+            if (!user) return;
+
+            const avatar = document.getElementById('userAvatar');
+            if(avatar) avatar.innerText = user.fullName.charAt(0).toUpperCase();
+
+            const header = document.getElementById('planHeader');
+            const grid = document.getElementById('mealGrid');
+
+            let title, desc, meals;
+
+            if (user.fitnessGoal === 'weight_loss') {
+                title = `${user.daily_cal_goal} kcal Lean & Green Plan`;
+                desc = "High protein, low carb meals designed to preserve muscle and burn fat.";
+                meals = [
+                    { type: 'Breakfast', name: 'Scrambled Eggs with Spinach & Feta', cals: 320, p: 25, c: 5, f: 22 },
+                    { type: 'Lunch', name: 'Grilled Chicken Salad with Vinaigrette', cals: 410, p: 40, c: 15, f: 20 },
+                    { type: 'Snack', name: 'Greek Yogurt with Mixed Berries', cals: 150, p: 15, c: 18, f: 3 },
+                    { type: 'Dinner', name: 'Baked Salmon with Asparagus', cals: 450, p: 35, c: 10, f: 28 }
+                ];
+            } else if (user.fitnessGoal === 'weight_gain') {
+                title = `${user.daily_cal_goal} kcal Muscle Builder Plan`;
+                desc = "Caloric surplus with high quality proteins and complex carbs to fuel growth.";
+                meals = [
+                    { type: 'Breakfast', name: 'Oatmeal with Peanut Butter & Banana', cals: 550, p: 20, c: 80, f: 22 },
+                    { type: 'Lunch', name: 'Turkey & Cheese Whole-Wheat Wrap', cals: 650, p: 45, c: 65, f: 25 },
+                    { type: 'Snack', name: 'Protein Shake & Handful of Almonds', cals: 350, p: 30, c: 20, f: 18 },
+                    { type: 'Dinner', name: 'Lean Beef Stir-fry with Brown Rice', cals: 750, p: 50, c: 90, f: 20 }
+                ];
+            } else {
+                title = `${user.daily_cal_goal} kcal Balanced Maintenance Plan`;
+                desc = "A sustainable approach maintaining a perfect equilibrium of macronutrients.";
+                meals = [
+                    { type: 'Breakfast', name: 'Avocado Toast with Poached Eggs', cals: 450, p: 20, c: 40, f: 25 },
+                    { type: 'Lunch', name: 'Quinoa & Mixed Bean Bowl', cals: 550, p: 20, c: 80, f: 15 },
+                    { type: 'Snack', name: 'Apple Slices with Almond Butter', cals: 200, p: 5, c: 25, f: 12 },
+                    { type: 'Dinner', name: 'Chicken Breast with Sweet Potato & Broccoli', cals: 600, p: 45, c: 60, f: 15 }
+                ];
+            }
+
+            header.innerHTML = `
+                <h2>${title}</h2>
+                <p>${desc}</p>
+            `;
+
+            grid.innerHTML = meals.map((m, i) => `
+                <div class="meal-card animate-fade-in-up" style="animation-delay: ${0.1 * (i+1)}s;">
+                    <div class="meal-type">${m.type}</div>
+                    <h3>${m.name}</h3>
+                    <div class="meal-macros">
+                        <div class="macro-item">
+                            <span class="macro-label">Calories</span>
+                            <strong>${m.cals}</strong>
+                        </div>
+                        <div class="macro-item">
+                            <span class="macro-label">Protein</span>
+                            <strong>${m.p}g</strong>
+                        </div>
+                        <div class="macro-item">
+                            <span class="macro-label">Carbs</span>
+                            <strong>${m.c}g</strong>
+                        </div>
+                        <div class="macro-item">
+                            <span class="macro-label">Fats</span>
+                            <strong>${m.f}g</strong>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        });
+    </script>
+</body>
+</html>
+

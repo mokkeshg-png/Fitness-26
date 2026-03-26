@@ -1,0 +1,950 @@
+# 📋 **Smart Fitness & Diet Tracking Web Application**
+## **Product Requirements Document (PRD)**
+
+---
+
+## 📌 **Document Information**
+
+| Document Attribute | Details |
+|-------------------|---------|
+| **Project Name** | Smart Fitness & Diet Tracking Web Application |
+| **Version** | 1.0 |
+| **Date** | March 25, 2026 |
+| **Status** | Draft |
+| **Target Platform** | Web (Desktop First, Mobile Responsive) |
+| **Technology Stack** | HTML5, CSS3, JavaScript, Supabase (PostgreSQL), MCP |
+
+---
+
+## 🎯 **1. Executive Summary**
+
+### 1.1 Product Vision
+A comprehensive web-based fitness assistant that empowers users to take control of their health journey through intelligent tracking, personalized recommendations, and actionable insights. The platform bridges the gap between fitness goals and daily actions by providing a seamless experience for monitoring nutrition, exercise, and body metrics.
+
+### 1.2 Business Objectives
+- Reduce user churn by 40% through engaging daily tracking features
+- Achieve 10,000 active users within first 6 months of launch
+- Maintain 85% user satisfaction rating for recommendation accuracy
+- Establish credibility through evidence-based fitness and nutrition guidance
+
+### 1.3 Target Users
+| User Persona | Description | Key Needs |
+|--------------|-------------|-----------|
+| **Fitness Beginners** | Users with no prior tracking experience | Simple interface, clear guidance, motivational feedback |
+| **Weight Management Enthusiasts** | Users focused on weight loss/gain | Accurate calorie tracking, progress visualization, meal planning |
+| **Health-Conscious Individuals** | Users maintaining healthy lifestyle | BMI monitoring, balanced diet suggestions, workout variety |
+| **Busy Professionals** | Users with limited time | Quick logging, smart suggestions, minimal input required |
+
+---
+
+## 🏗️ **2. System Architecture Overview**
+
+### 2.1 High-Level Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    Client Layer (Browser)                    │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐      │
+│  │   HTML   │ │   CSS    │ │   JS     │ │  ECharts │      │
+│  └──────────┘ └──────────┘ └──────────┘ └──────────┘      │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                 MCP (Model-Controller-Provider)             │
+│              ┌──────────────────────────────┐               │
+│              │   Business Logic Layer       │               │
+│              │   - Authentication Logic     │               │
+│              │   - Calorie Calculations     │               │
+│              │   - BMI Analytics            │               │
+│              │   - Recommendation Engine    │               │
+│              └──────────────────────────────┘               │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                    Supabase (Backend)                        │
+│  ┌──────────────────────────────────────────────────────┐  │
+│  │              PostgreSQL Database                      │  │
+│  │  ┌─────────┐ ┌─────────┐ ┌─────────┐ ┌─────────┐   │  │
+│  │  │ Users   │ │Food_Logs│ │Workouts │ │Metrics  │   │  │
+│  │  └─────────┘ └─────────┘ └─────────┘ └─────────┘   │  │
+│  └──────────────────────────────────────────────────────┘  │
+│  ┌──────────────────────────────────────────────────────┐  │
+│  │              Authentication Service                   │  │
+│  └──────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 2.2 Technology Stack Details
+
+| Component | Technology | Purpose |
+|-----------|------------|---------|
+| **Frontend** | HTML5, CSS3, Vanilla JS | UI rendering, client-side logic |
+| **Data Visualization** | Chart.js / ECharts | Progress graphs and analytics |
+| **Backend Logic** | MCP Framework | Business rules, calculations, validation |
+| **Database** | PostgreSQL (Supabase) | Data persistence, relationships |
+| **Authentication** | Supabase Auth | User management, session handling |
+| **Hosting** | Vercel / Netlify | Deployment, CDN |
+
+---
+
+## 📊 **3. Database Schema Design**
+
+### 3.1 Entity Relationship Diagram (ERD)
+
+```
+┌─────────────────┐     ┌─────────────────┐     ┌─────────────────┐
+│     users       │     │   food_logs     │     │    workouts     │
+├─────────────────┤     ├─────────────────┤     ├─────────────────┤
+│ id (PK)         │────<│ user_id (FK)    │     │ id (PK)         │
+│ email           │     │ id (PK)         │     │ user_id (FK)    │
+│ password_hash   │     │ food_name       │     │ workout_type    │
+│ full_name       │     │ calories        │     │ duration_min    │
+│ height          │     │ meal_type       │     │ calories_burned │
+│ weight          │     │ consumed_at     │     │ completed_at    │
+│ fitness_goal    │     │ created_at      │     │ notes           │
+│ daily_cal_goal  │     │                 │     │                 │
+│ created_at      │     │                 │     │                 │
+└─────────────────┘     └─────────────────┘     └─────────────────┘
+         │
+         │
+         ▼
+┌─────────────────┐     ┌─────────────────┐
+│   body_metrics  │     │  diet_plans     │
+├─────────────────┤     ├─────────────────┤
+│ id (PK)         │     │ id (PK)         │
+│ user_id (FK)    │     │ goal_type       │
+│ weight          │     │ meal_name       │
+│ body_fat_pct    │     │ calories        │
+│ measured_date   │     │ protein         │
+│ notes           │     │ carbs           │
+└─────────────────┘     │ fats            │
+                        │ description     │
+                        └─────────────────┘
+```
+
+### 3.2 Table Specifications
+
+#### **Table 1: users**
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | UUID | PRIMARY KEY, DEFAULT gen_random_uuid() | Unique user identifier |
+| email | VARCHAR(255) | UNIQUE, NOT NULL | User's email address |
+| password_hash | VARCHAR(255) | NOT NULL | Hashed password |
+| full_name | VARCHAR(100) | NOT NULL | User's full name |
+| height | DECIMAL(5,2) | CHECK (height > 0) | Height in centimeters |
+| weight | DECIMAL(5,2) | CHECK (weight > 0) | Weight in kilograms |
+| fitness_goal | VARCHAR(20) | NOT NULL | 'weight_loss', 'weight_gain', 'maintain' |
+| daily_cal_goal | INTEGER | NOT NULL | Calculated daily calorie target |
+| created_at | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Account creation date |
+| updated_at | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Last update timestamp |
+
+#### **Table 2: food_logs**
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | UUID | PRIMARY KEY, DEFAULT gen_random_uuid() | Log entry identifier |
+| user_id | UUID | FOREIGN KEY REFERENCES users(id) ON DELETE CASCADE | User reference |
+| food_name | VARCHAR(200) | NOT NULL | Name of consumed food |
+| calories | INTEGER | CHECK (calories >= 0) | Calorie count |
+| meal_type | VARCHAR(20) | NOT NULL | 'breakfast', 'lunch', 'dinner', 'snack' |
+| consumed_at | DATE | NOT NULL | Date of consumption |
+| created_at | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Log creation timestamp |
+
+#### **Table 3: workouts**
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | UUID | PRIMARY KEY, DEFAULT gen_random_uuid() | Workout identifier |
+| user_id | UUID | FOREIGN KEY REFERENCES users(id) ON DELETE CASCADE | User reference |
+| workout_type | VARCHAR(50) | NOT NULL | 'cardio', 'strength', 'yoga', 'hiit' |
+| duration_min | INTEGER | CHECK (duration_min > 0) | Duration in minutes |
+| calories_burned | INTEGER | CHECK (calories_burned >= 0) | Estimated calories burned |
+| completed_at | DATE | NOT NULL | Completion date |
+| notes | TEXT | | Optional notes |
+| created_at | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Entry timestamp |
+
+#### **Table 4: body_metrics**
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | UUID | PRIMARY KEY, DEFAULT gen_random_uuid() | Metric identifier |
+| user_id | UUID | FOREIGN KEY REFERENCES users(id) ON DELETE CASCADE | User reference |
+| weight | DECIMAL(5,2) | NOT NULL, CHECK (weight > 0) | Weight in kilograms |
+| body_fat_pct | DECIMAL(4,1) | CHECK (body_fat_pct BETWEEN 0 AND 50) | Body fat percentage |
+| measured_date | DATE | NOT NULL | Measurement date |
+| notes | TEXT | | Additional notes |
+| created_at | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Entry timestamp |
+
+#### **Table 5: diet_plans**
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| id | UUID | PRIMARY KEY, DEFAULT gen_random_uuid() | Plan identifier |
+| goal_type | VARCHAR(20) | NOT NULL | 'weight_loss', 'weight_gain', 'maintain' |
+| meal_name | VARCHAR(100) | NOT NULL | Meal description |
+| calories | INTEGER | NOT NULL | Calorie count |
+| protein | INTEGER | | Protein in grams |
+| carbs | INTEGER | | Carbohydrates in grams |
+| fats | INTEGER | | Fats in grams |
+| description | TEXT | | Detailed meal description |
+| created_at | TIMESTAMP | DEFAULT CURRENT_TIMESTAMP | Plan creation timestamp |
+
+---
+
+## 🎨 **4. Frontend Pages & Components**
+
+### 4.1 Page Structure
+
+```
+├── public/
+│   ├── index.html              # Landing page
+│   ├── login.html              # Login page
+│   ├── register.html           # Registration page
+│   ├── dashboard.html          # Main dashboard
+│   ├── food-log.html           # Food logging interface
+│   ├── workout-log.html        # Workout logging interface
+│   ├── progress.html           # Progress tracking & analytics
+│   ├── diet-plan.html          # Diet recommendations
+│   ├── workout-plan.html       # Exercise routines
+│   ├── profile.html            # User profile settings
+│   └── bmi-calculator.html     # BMI calculation tool
+│
+├── css/
+│   ├── main.css                # Global styles
+│   ├── dashboard.css           # Dashboard specific
+│   ├── forms.css               # Form styles
+│   └── responsive.css          # Mobile responsiveness
+│
+├── js/
+│   ├── auth.js                 # Authentication logic
+│   ├── dashboard.js            # Dashboard functionality
+│   ├── calorie-tracker.js      # Calorie tracking logic
+│   ├── bmi-calculator.js       # BMI calculations
+│   ├── charts.js               # Data visualization
+│   ├── api.js                  # API communication
+│   └── utils.js                # Helper functions
+│
+└── assets/
+    ├── images/                 # Static images
+    ├── icons/                  # SVG icons
+    └── fonts/                  # Custom fonts
+```
+
+### 4.2 Detailed Page Specifications
+
+#### **4.2.1 Landing Page (index.html)**
+
+**Purpose:** First impression, user acquisition
+
+**Components:**
+- Hero section with tagline: "Transform Your Health Journey"
+- Feature highlights (3-4 key features with icons)
+- Call-to-action buttons: "Get Started" → Register, "Login" → Login
+- How it works section (3-step process)
+- Testimonials carousel
+- Footer with links and contact
+
+**Technical Requirements:**
+- Full responsive design
+- Lazy loading for images
+- SEO optimized meta tags
+- Analytics tracking scripts
+
+#### **4.2.2 Authentication Pages (login.html, register.html)**
+
+**Login Page Components:**
+- Email input field (validation)
+- Password input field (with show/hide)
+- "Remember me" checkbox
+- Forgot password link
+- Submit button
+- Link to registration
+
+**Registration Page Components:**
+- Full name input
+- Email input (unique validation)
+- Password (strength meter)
+- Confirm password
+- Height input (cm)
+- Weight input (kg)
+- Fitness goal dropdown (weight_loss/weight_gain/maintain)
+- Terms & conditions checkbox
+- Submit button
+
+**Validation Rules:**
+- Email format: regex validation
+- Password: minimum 8 chars, 1 uppercase, 1 number, 1 special character
+- Height: 100-250 cm
+- Weight: 30-300 kg
+
+#### **4.2.3 Dashboard (dashboard.html)**
+
+**Purpose:** Central hub for user activity and quick overview
+
+**Layout Components:**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  Header: Greeting, Date, Profile Icon                        │
+├─────────────────────────────────────────────────────────────┤
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
+│  │ Calorie Card │  │ Workout Card │  │ Weight Card  │     │
+│  │ 1250/2000   │  │ 2/4 workouts │  │ 72.5 kg      │     │
+│  │ 62%         │  │ 50%         │  │ -0.5kg       │     │
+│  └──────────────┘  └──────────────┘  └──────────────┘     │
+├─────────────────────────────────────────────────────────────┤
+│  Quick Actions:                                              │
+│  [➕ Log Food]  [🏃 Log Workout]  [⚖️ Update Weight]        │
+├─────────────────────────────────────────────────────────────┤
+│  Recent Activity                                             │
+│  • Breakfast: Oatmeal - 350 cal                              │
+│  • Morning Run: 30 min - 250 cal burned                      │
+│  • Lunch: Chicken Salad - 450 cal                            │
+├─────────────────────────────────────────────────────────────┤
+│  Daily Recommendations                                        │
+│  • You need 750 more calories today                          │
+│  • Consider a protein-rich dinner                            │
+└─────────────────────────────────────────────────────────────┘
+```
+
+**Technical Requirements:**
+- Real-time data fetching from Supabase
+- Auto-refresh every 5 minutes
+- Progress bars for daily goals
+- Charts for weekly trends
+
+#### **4.2.4 Food Log Page (food-log.html)**
+
+**Purpose:** Record daily food consumption
+
+**Components:**
+- Date selector (default: today)
+- Search/Quick Add food items
+- Manual entry form:
+  - Food name (autocomplete from history)
+  - Calories (numeric)
+  - Meal type dropdown
+  - Portion size (with calculation)
+- Recent foods quick selection
+- Daily summary with remaining calories
+- List of today's entries with edit/delete options
+
+**Data Validation:**
+- Calories: positive integer, max 5000 per entry
+- Food name: minimum 2 characters
+- Maximum 20 entries per day
+
+#### **4.2.5 Progress Page (progress.html)**
+
+**Purpose:** Visualize health data over time
+
+**Charts to Include:**
+1. **Weight Trend Chart** (Line chart) - Last 30 days
+2. **Calorie Intake vs Goal** (Area chart) - Weekly view
+3. **Workout Frequency** (Bar chart) - Monthly summary
+4. **BMI History** (Line chart) - Historical BMI changes
+5. **Macro Distribution** (Pie chart) - Protein/Carbs/Fats
+
+**Additional Features:**
+- Date range filters (week, month, year, custom)
+- Export data as CSV/PDF
+- Achievement badges display
+- Weekly summary statistics
+
+#### **4.2.6 Diet Plan Page (diet-plan.html)**
+
+**Purpose:** Provide personalized meal recommendations
+
+**Components:**
+- Goal selector (links to user profile)
+- Meal plan grid:
+  - Breakfast (3-4 options)
+  - Morning Snack
+  - Lunch
+  - Evening Snack
+  - Dinner
+- Nutritional breakdown per meal
+- Calorie budget tracker
+- Recipe links (external or modal)
+- Shopping list generator
+- Customization options (dietary restrictions)
+
+#### **4.2.7 Workout Plan Page (workout-plan.html)**
+
+**Purpose:** Curated exercise routines
+
+**Structure by Goal:**
+- **Weight Loss Focus:** HIIT, Cardio, Circuit training
+- **Weight Gain/Muscle Building:** Strength training, Compound lifts
+- **Maintenance:** Balanced mix, Yoga, Light cardio
+
+**Each Workout Includes:**
+- Workout name and type
+- Duration
+- Calories burned estimate
+- Difficulty level
+- Equipment needed
+- Step-by-step instructions (images/videos)
+- Progress tracking checkbox
+
+#### **4.2.8 Profile Page (profile.html)**
+
+**Purpose:** Manage user settings and preferences
+
+**Sections:**
+1. **Personal Information**
+   - Full name (editable)
+   - Email (read-only)
+   - Height, Weight (updatable)
+   - Fitness goal (editable)
+   - Daily calorie goal (auto-recalculated)
+
+2. **Notification Settings**
+   - Daily reminder (on/off, time)
+   - Goal achievement alerts
+   - Weekly report email
+
+3. **Account Management**
+   - Change password
+   - Delete account (with confirmation)
+   - Export data
+
+4. **Preferences**
+   - Unit system (metric/imperial)
+   - Theme (light/dark)
+   - Language
+
+---
+
+## 🧮 **5. Core Business Logic & Algorithms**
+
+### 5.1 BMI Calculation Formula
+```
+BMI = weight (kg) / (height (m))²
+
+Categories:
+• Underweight: < 18.5
+• Normal: 18.5 - 24.9
+• Overweight: 25 - 29.9
+• Obese: ≥ 30
+```
+
+### 5.2 Daily Calorie Goal Calculation
+
+**BMR (Basal Metabolic Rate) using Mifflin-St Jeor:**
+```
+Male: BMR = (10 × weight) + (6.25 × height) - (5 × age) + 5
+Female: BMR = (10 × weight) + (6.25 × height) - (5 × age) - 161
+```
+
+**TDEE (Total Daily Energy Expenditure) = BMR × Activity Factor:**
+- Sedentary (little/no exercise): × 1.2
+- Lightly active (1-3 days/week): × 1.375
+- Moderately active (3-5 days/week): × 1.55
+- Very active (6-7 days/week): × 1.725
+- Extremely active (athlete): × 1.9
+
+**Calorie Goal Adjustment:**
+```
+Weight Loss: TDEE - 500 (1 lb/week loss)
+Weight Gain: TDEE + 500 (1 lb/week gain)
+Maintain: TDEE
+```
+
+### 5.3 Calorie Tracking Logic
+
+```javascript
+function calculateDailyStatus(user, foodLogs, workouts) {
+    const consumed = foodLogs.reduce((sum, log) => sum + log.calories, 0);
+    const burned = workouts.reduce((sum, w) => sum + w.calories_burned, 0);
+    const netCalories = consumed - burned;
+    const remaining = user.daily_cal_goal - netCalories;
+    
+    let status = '';
+    let suggestion = '';
+    
+    if (remaining < -500) {
+        status = 'danger';
+        suggestion = '⚠️ Significantly over your calorie target. Consider lighter meals tomorrow.';
+    } else if (remaining < 0) {
+        status = 'warning';
+        suggestion = '⚠️ Slightly over target. Balance with extra activity.';
+    } else if (remaining > 500) {
+        status = 'warning';
+        suggestion = '⚠️ Below target. Consider a healthy snack.';
+    } else if (remaining >= 0 && remaining <= 200) {
+        status = 'perfect';
+        suggestion = '🎯 Perfect! You\'re right on track!';
+    } else {
+        status = 'good';
+        suggestion = '✅ Good progress! Keep it up.';
+    }
+    
+    return { netCalories, remaining, status, suggestion };
+}
+```
+
+### 5.4 Recommendation Engine
+
+```javascript
+function getRecommendations(user, recentData) {
+    const recommendations = [];
+    
+    // Calorie-based recommendations
+    if (recentData.dailyCalorieStatus === 'under') {
+        recommendations.push({
+            type: 'nutrition',
+            message: 'Increase calorie intake with nutrient-dense foods like nuts, avocado, and whole grains.'
+        });
+    }
+    
+    // Workout frequency check
+    const workoutsThisWeek = recentData.workoutsThisWeek;
+    if (workoutsThisWeek < 3) {
+        recommendations.push({
+            type: 'exercise',
+            message: `You've completed ${workoutsThisWeek} workouts this week. Aim for 3-4 sessions for optimal results.`
+        });
+    }
+    
+    // Protein intake check
+    if (recentData.proteinIntake < 0.8 * user.weight) {
+        recommendations.push({
+            type: 'nutrition',
+            message: 'Increase protein intake to support muscle recovery. Try adding eggs, chicken, or legumes to meals.'
+        });
+    }
+    
+    // Water intake reminder
+    if (recentData.waterIntake < 8) {
+        recommendations.push({
+            type: 'hydration',
+            message: 'Stay hydrated! Aim for 8 glasses of water daily.'
+        });
+    }
+    
+    return recommendations;
+}
+```
+
+### 5.5 Workout Calorie Burn Estimation
+
+| Activity Type | Calories per Minute (per kg) |
+|--------------|----------------------------|
+| Running (8 km/h) | 0.12 |
+| Cycling (moderate) | 0.08 |
+| Swimming | 0.10 |
+| Strength Training | 0.06 |
+| Yoga | 0.04 |
+| HIIT | 0.15 |
+
+```
+Calories Burned = Weight (kg) × MET × Duration (hours)
+Where MET = Metabolic Equivalent of Task
+```
+
+---
+
+## 🔌 **6. MCP Implementation Details**
+
+### 6.1 MCP Configuration
+
+```javascript
+// mcp.config.js
+module.exports = {
+  version: '1.0.0',
+  database: {
+    supabase: {
+      url: process.env.SUPABASE_URL,
+      anonKey: process.env.SUPABASE_ANON_KEY,
+      schema: 'public'
+    }
+  },
+  models: {
+    user: {
+      table: 'users',
+      primaryKey: 'id',
+      fields: ['email', 'full_name', 'height', 'weight', 'fitness_goal', 'daily_cal_goal']
+    },
+    foodLog: {
+      table: 'food_logs',
+      primaryKey: 'id',
+      fields: ['user_id', 'food_name', 'calories', 'meal_type', 'consumed_at']
+    }
+  },
+  controllers: {
+    auth: {
+      methods: ['register', 'login', 'logout', 'resetPassword']
+    },
+    tracking: {
+      methods: ['logFood', 'logWorkout', 'updateWeight', 'getDailySummary']
+    },
+    analytics: {
+      methods: ['calculateBMI', 'getProgressData', 'generateRecommendations']
+    }
+  }
+};
+```
+
+### 6.2 MCP Model Definitions
+
+```javascript
+// models/User.js
+class UserModel {
+    constructor(supabase) {
+        this.supabase = supabase;
+    }
+    
+    async create(userData) {
+        const { data, error } = await this.supabase
+            .from('users')
+            .insert([{
+                email: userData.email,
+                full_name: userData.fullName,
+                height: userData.height,
+                weight: userData.weight,
+                fitness_goal: userData.fitnessGoal,
+                daily_cal_goal: this.calculateDailyCalorieGoal(userData)
+            }])
+            .select()
+            .single();
+            
+        if (error) throw error;
+        return data;
+    }
+    
+    async findByEmail(email) {
+        const { data, error } = await this.supabase
+            .from('users')
+            .select('*')
+            .eq('email', email)
+            .single();
+            
+        if (error && error.code !== 'PGRST116') throw error;
+        return data;
+    }
+    
+    async updateProfile(userId, updates) {
+        const { data, error } = await this.supabase
+            .from('users')
+            .update(updates)
+            .eq('id', userId)
+            .select()
+            .single();
+            
+        if (error) throw error;
+        return data;
+    }
+    
+    calculateDailyCalorieGoal(userData) {
+        // BMR calculation
+        const age = this.calculateAge(userData.birthDate);
+        let bmr;
+        
+        if (userData.gender === 'male') {
+            bmr = (10 * userData.weight) + (6.25 * userData.height) - (5 * age) + 5;
+        } else {
+            bmr = (10 * userData.weight) + (6.25 * userData.height) - (5 * age) - 161;
+        }
+        
+        // TDEE with moderate activity factor
+        const tdee = bmr * 1.55;
+        
+        // Adjust based on goal
+        switch (userData.fitnessGoal) {
+            case 'weight_loss':
+                return Math.round(tdee - 500);
+            case 'weight_gain':
+                return Math.round(tdee + 500);
+            default:
+                return Math.round(tdee);
+        }
+    }
+}
+```
+
+### 6.3 MCP Controller Implementation
+
+```javascript
+// controllers/TrackingController.js
+class TrackingController {
+    constructor(models) {
+        this.models = models;
+    }
+    
+    async logFood(req, res) {
+        try {
+            const { userId, foodName, calories, mealType, consumedAt } = req.body;
+            
+            // Validation
+            if (!foodName || !calories || !mealType) {
+                return res.status(400).json({ error: 'Missing required fields' });
+            }
+            
+            // Create log entry
+            const foodLog = await this.models.foodLog.create({
+                user_id: userId,
+                food_name: foodName,
+                calories: calories,
+                meal_type: mealType,
+                consumed_at: consumedAt || new Date().toISOString().split('T')[0]
+            });
+            
+            // Get today's summary
+            const dailySummary = await this.getDailySummary(userId);
+            
+            res.status(201).json({
+                success: true,
+                data: foodLog,
+                summary: dailySummary
+            });
+        } catch (error) {
+            console.error('Error logging food:', error);
+            res.status(500).json({ error: 'Internal server error' });
+        }
+    }
+    
+    async getDailySummary(userId, date = null) {
+        const targetDate = date || new Date().toISOString().split('T')[0];
+        
+        // Get user data
+        const user = await this.models.user.findById(userId);
+        
+        // Get today's food logs
+        const foodLogs = await this.models.foodLog.findByUserAndDate(userId, targetDate);
+        
+        // Get today's workouts
+        const workouts = await this.models.workout.findByUserAndDate(userId, targetDate);
+        
+        // Calculate totals
+        const totalCalories = foodLogs.reduce((sum, log) => sum + log.calories, 0);
+        const totalBurned = workouts.reduce((sum, w) => sum + w.calories_burned, 0);
+        const netCalories = totalCalories - totalBurned;
+        const remainingCalories = user.daily_cal_goal - netCalories;
+        
+        // Generate suggestions
+        let status = 'on_track';
+        let message = '';
+        
+        if (remainingCalories < -500) {
+            status = 'danger';
+            message = 'Significantly over calorie target. Consider adjusting tomorrow\'s intake.';
+        } else if (remainingCalories < 0) {
+            status = 'warning';
+            message = 'Slightly over target. Add some extra activity today.';
+        } else if (remainingCalories > 500) {
+            status = 'warning';
+            message = 'Below target. Have a healthy snack.';
+        } else if (remainingCalories >= 0 && remainingCalories <= 200) {
+            status = 'perfect';
+            message = 'Perfect! You\'re exactly on track!';
+        } else {
+            status = 'good';
+            message = 'Good progress! Keep it up.';
+        }
+        
+        return {
+            date: targetDate,
+            calorie_goal: user.daily_cal_goal,
+            total_consumed: totalCalories,
+            total_burned: totalBurned,
+            net_calories: netCalories,
+            remaining: remainingCalories,
+            status: status,
+            message: message,
+            meals: this.groupMealsByType(foodLogs),
+            workouts: workouts
+        };
+    }
+}
+```
+
+### 6.4 MCP API Routes
+
+```javascript
+// routes/api.js
+const express = require('express');
+const router = express.Router();
+const { AuthController, TrackingController, AnalyticsController } = require('../controllers');
+
+// Authentication Routes
+router.post('/auth/register', AuthController.register);
+router.post('/auth/login', AuthController.login);
+router.post('/auth/logout', AuthController.logout);
+router.post('/auth/reset-password', AuthController.resetPassword);
+
+// Tracking Routes
+router.post('/tracking/food', authenticate, TrackingController.logFood);
+router.put('/tracking/food/:id', authenticate, TrackingController.updateFoodLog);
+router.delete('/tracking/food/:id', authenticate, TrackingController.deleteFoodLog);
+router.post('/tracking/workout', authenticate, TrackingController.logWorkout);
+router.get('/tracking/daily-summary', authenticate, TrackingController.getDailySummary);
+router.get('/tracking/weekly-summary', authenticate, TrackingController.getWeeklySummary);
+
+// Analytics Routes
+router.get('/analytics/bmi', authenticate, AnalyticsController.getBMIHistory);
+router.get('/analytics/progress', authenticate, AnalyticsController.getProgressData);
+router.get('/analytics/recommendations', authenticate, AnalyticsController.getRecommendations);
+router.get('/analytics/insights', authenticate, AnalyticsController.getHealthInsights);
+
+// Profile Routes
+router.get('/profile', authenticate, ProfileController.getProfile);
+router.put('/profile', authenticate, ProfileController.updateProfile);
+router.put('/profile/goal', authenticate, ProfileController.updateGoal);
+
+module.exports = router;
+```
+
+---
+
+## 🔄 **7. Development Phases & Timeline**
+
+### **Phase 1: Foundation (Week 1-2)**
+| Task | Duration | Deliverables |
+|------|----------|--------------|
+| Project setup & configuration | 2 days | Repository, folder structure |
+| Database schema creation | 2 days | Supabase tables, RLS policies |
+| Authentication system | 3 days | Login/Register pages, session management |
+| Basic HTML/CSS templates | 3 days | Base layouts, responsive design |
+
+### **Phase 2: Core Features (Week 3-4)**
+| Task | Duration | Deliverables |
+|------|----------|--------------|
+| Dashboard implementation | 3 days | Summary cards, quick actions |
+| Food logging system | 3 days | Add/edit/delete food entries |
+| Workout logging system | 2 days | Add workout entries, calorie calculation |
+| Progress tracking | 2 days | Charts, data visualization |
+
+### **Phase 3: Advanced Features (Week 5-6)**
+| Task | Duration | Deliverables |
+|------|----------|--------------|
+| BMI calculator | 2 days | Calculation, history tracking |
+| Recommendation engine | 3 days | AI-driven suggestions |
+| Diet plan generator | 2 days | Personalized meal plans |
+| Workout plan library | 2 days | Exercise database, routines |
+
+### **Phase 4: Polish & Deployment (Week 7-8)**
+| Task | Duration | Deliverables |
+|------|----------|--------------|
+| UI/UX refinement | 3 days | Animations, transitions, error states |
+| Testing & bug fixes | 3 days | Unit tests, integration tests |
+| Performance optimization | 2 days | Load times, caching |
+| Deployment & documentation | 2 days | Live URL, user guide |
+
+---
+
+## 🧪 **8. Testing Strategy**
+
+### 8.1 Test Cases
+
+| Test Category | Test Cases | Success Criteria |
+|--------------|------------|------------------|
+| **Authentication** | - Valid login credentials<br>- Invalid login attempts<br>- Registration with duplicate email<br>- Password reset flow | - Correct user redirect<br>- Error messages displayed<br>- No data leakage |
+| **Food Logging** | - Add food with all fields<br>- Add food with missing fields<br>- Edit existing entry<br>- Delete entry<br>- View history | - Data saved to DB<br>- UI updates immediately<br>- Calories recalculated |
+| **Calorie Calculation** | - Different meal combinations<br>- Workout calorie burn<br>- Net calorie calculation<br>- Goal remaining accuracy | - Math accuracy within 1%<br>- All formulas correct |
+| **Data Visualization** | - Charts render with data<br>- Empty state handling<br>- Date range changes<br>- Export functionality | - No JS errors<br>- Responsive charts<br>- Correct data representation |
+| **Responsive Design** | - Mobile (320px)<br>- Tablet (768px)<br>- Desktop (1200px+) | - No horizontal scroll<br>- Touch-friendly buttons<br>- Readable text |
+
+### 8.2 Performance Benchmarks
+- Page load time: < 2 seconds
+- API response time: < 500ms
+- Time to interactive: < 3 seconds
+- Lighthouse score: > 90 (Performance, Accessibility, SEO)
+
+---
+
+## 🔒 **9. Security Considerations**
+
+### 9.1 Authentication & Authorization
+- JWT tokens with 24-hour expiration
+- Refresh token rotation
+- Row Level Security (RLS) in Supabase
+- Password hashing with bcrypt (10+ rounds)
+- Rate limiting: 100 requests per IP per hour
+
+### 9.2 Data Protection
+- HTTPS enforcement
+- Input sanitization to prevent XSS
+- SQL injection prevention via parameterized queries
+- Environment variables for secrets
+- CORS configuration (whitelist specific origins)
+
+### 9.3 Privacy Compliance
+- GDPR compliant data handling
+- User data export functionality
+- Account deletion option
+- Clear privacy policy
+- No third-party tracking without consent
+
+---
+
+## 📈 **10. Success Metrics & KPIs**
+
+| Metric | Target | Measurement Method |
+|--------|--------|-------------------|
+| Daily Active Users | 1000 | Supabase analytics |
+| User Retention (30-day) | 60% | Cohort analysis |
+| Average Session Duration | 5 minutes | Frontend analytics |
+| Features Used per User | 3+ | Database queries |
+| Food Log Completion Rate | 80% | Daily active logging |
+| Recommendation Click-through | 25% | Event tracking |
+| User Satisfaction Score | 4.5/5 | Post-login survey |
+| Page Load Speed | < 2s | Performance monitoring |
+
+---
+
+## 📝 **11. Future Enhancements (V2.0)**
+
+1. **Social Features**
+   - Friend connections
+   - Share achievements
+   - Group challenges
+   - Leaderboards
+
+2. **Mobile App**
+   - React Native mobile application
+   - Push notifications
+   - Barcode scanning for food
+   - Wearable device integration (Fitbit, Apple Watch)
+
+3. **AI/ML Enhancements**
+   - Predictive analytics for weight trends
+   - Automated meal planning
+   - Voice logging
+   - Image recognition for food
+
+4. **Premium Features**
+   - Personalized coaching
+   - Advanced analytics
+   - Custom workout plans
+   - Nutritionist consultations
+
+5. **Integration**
+   - Google Fit API
+   - Apple HealthKit
+   - Smart scales integration
+   - Grocery delivery services
+
+---
+
+## 📋 **12. Technical Requirements Checklist**
+
+### Frontend
+- [x] HTML5 semantic structure
+- [x] CSS3 with Flexbox/Grid
+- [x] Vanilla JavaScript (ES6+)
+- [x] Chart.js/ECharts for visualizations
+- [x] Local storage for offline capability
+- [x] Form validation (client-side)
+- [x] Responsive breakpoints
+
+### Backend (MCP + Supabase)
+- [x] PostgreSQL tables with relationships
+- [x] Row Level Security policies
+- [x] Indexes on frequently queried columns
+- [x] Real-time subscriptions
+- [x] Stored procedures for complex calculations
+- [x] Database triggers for auto-updates
+
+### DevOps
+- [x] Git version control
+- [x] Environment configuration (.env)
+- [x]

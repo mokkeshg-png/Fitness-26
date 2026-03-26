@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Transform Your Health Journey with Smart Fitness & Diet Tracking">
+    <title>FitTrack - Smart Fitness & Diet Tracking</title>
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/main.css">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Landing Page Specific Styles */
+        .hero {
+            padding: 160px 0 100px;
+            background: radial-gradient(circle at top right, var(--primary-light), transparent 50%),
+                        radial-gradient(circle at bottom left, rgba(233, 30, 99, 0.05), transparent 50%);
+            min-height: 90vh;
+            display: flex;
+            align-items: center;
+        }
+
+        .hero-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .hero-content h1 {
+            font-size: 3.5rem;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, var(--text-dark), var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-content p {
+            font-size: 1.2rem;
+            color: var(--text-light);
+            margin-bottom: 40px;
+            max-width: 500px;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 16px;
+        }
+
+        .hero-image {
+            position: relative;
+            perspective: 1000px;
+        }
+
+        .dashboard-mockup {
+            width: 100%;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            transform: rotateY(-15deg) rotateX(5deg);
+            transition: transform var(--transition);
+            border: 1px solid var(--glass-border);
+            background: var(--surface);
+        }
+
+        .hero-image:hover .dashboard-mockup {
+            transform: rotateY(0deg) rotateX(0deg);
+        }
+
+        /* Features Section */
+        .features {
+            padding: 100px 0;
+            background: var(--surface);
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-header h2 {
+            font-size: 2.5rem;
+            margin-bottom: 16px;
+        }
+
+        .section-header p {
+            color: var(--text-light);
+            font-size: 1.1rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .feature-card {
+            padding: 40px;
+            text-align: center;
+            transition: transform var(--transition);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 24px;
+            background: var(--primary-light);
+            color: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+
+        .feature-title {
+            font-size: 1.5rem;
+            margin-bottom: 16px;
+        }
+
+        .feature-desc {
+            color: var(--text-light);
+        }
+
+        /* How it works */
+        .steps {
+            padding: 100px 0;
+        }
+
+        .steps-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+            position: relative;
+        }
+
+        .step {
+            text-align: center;
+            position: relative;
+        }
+
+        .step-number {
+            width: 60px;
+            height: 60px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0 auto 24px;
+            position: relative;
+            z-index: 2;
+            box-shadow: 0 0 0 10px var(--surface);
+        }
+
+        .step-loader {
+            position: absolute;
+            top: 30px;
+            left: 50%;
+            width: 100%;
+            height: 2px;
+            background: rgba(150, 150, 150, 0.2);
+            z-index: 1;
+        }
+
+        .step:last-child .step-loader {
+            display: none;
+        }
+
+        @media (max-width: 900px) {
+            .hero-container {
+                grid-template-columns: 1fr;
+            }
+            .hero-content {
+                text-align: center;
+            }
+            .hero-content p {
+                margin: 0 auto 40px;
+            }
+            .hero-actions {
+                justify-content: center;
+            }
+            .dashboard-mockup {
+                transform: none;
+            }
+            .steps-container {
+                grid-template-columns: 1fr;
+                gap: 60px;
+            }
+            .step-loader {
+                width: 2px;
+                height: 100%;
+                top: 50%;
+                left: 50%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar transition-all" id="navbar">
+        <div class="container">
+            <a href="index.html" class="brand">
+                <i class="fa-solid fa-heart-pulse brand-icon"></i>
+                FitTrack
+            </a>
+            <div class="nav-links d-none d-md-flex">
+                <a href="#features">Features</a>
+                <a href="#how-it-works">How it Works</a>
+                <a href="#testimonials">Testimonials</a>
+            </div>
+            <div class="nav-actions">
+                <button type="button" class="theme-toggle" id="themeToggle">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+                <a href="login.html" class="btn btn-outline">Login</a>
+                <a href="register.html" class="btn btn-primary">Get Started</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container hero-container animate-fade-in-up">
+            <div class="hero-content">
+                <h1>Transform Your Health Journey</h1>
+                <p>An intelligent web-based fitness assistant that empowers you to take control of your health through smart tracking, personalized recommendations, and actionable insights.</p>
+                <div class="hero-actions">
+                    <a href="register.html" class="btn btn-primary">
+                        Start for Free <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                    <a href="#features" class="btn btn-outline">Learn More</a>
+                </div>
+            </div>
+            <div class="hero-image">
+                <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80" alt="Dashboard Mockup" class="dashboard-mockup">
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section class="features" id="features">
+        <div class="container">
+            <div class="section-header animate-fade-in-up">
+                <h2>Why Choose FitTrack?</h2>
+                <p>Everything you need to reach your fitness goals faster, built into one seamless platform.</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card glass-panel animate-fade-in-up" style="animation-delay: 0.1s;">
+                    <div class="feature-icon">
+                        <i class="fa-solid fa-utensils"></i>
+                    </div>
+                    <h3 class="feature-title">Smart Diet Tracking</h3>
+                    <p class="feature-desc">Log your meals effortlessly. Get automatic calorie, protein, carbs, and fat breakdowns instantly to keep your diet on point.</p>
+                </div>
+                <div class="feature-card glass-panel animate-fade-in-up" style="animation-delay: 0.2s;">
+                    <div class="feature-icon">
+                        <i class="fa-solid fa-dumbbell"></i>
+                    </div>
+                    <h3 class="feature-title">Workout Analytics</h3>
+                    <p class="feature-desc">Track your exercises, calculate accurate calorie burns based on duration and intensity, and map your progress over time.</p>
+                </div>
+                <div class="feature-card glass-panel animate-fade-in-up" style="animation-delay: 0.3s;">
+                    <div class="feature-icon">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    </div>
+                    <h3 class="feature-title">AI Recommendations</h3>
+                    <p class="feature-desc">Receive tailored advice, dynamic meal plans, and workout routines adapted precisely to your body metrics and ongoing goals.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How it Works -->
+    <section class="steps" id="how-it-works">
+        <div class="container">
+            <div class="section-header animate-fade-in-up">
+                <h2>How It Works</h2>
+                <p>Your journey to a healthier lifestyle in 3 simple steps.</p>
+            </div>
+            <div class="steps-container">
+                <div class="step animate-fade-in-up" style="animation-delay: 0.1s;">
+                    <div class="step-loader"></div>
+                    <div class="step-number">1</div>
+                    <h3 class="feature-title">Set Your Goal</h3>
+                    <p class="feature-desc">Input your height, weight, and fitness target. We'll instantly calculate your daily calorie and macro goals.</p>
+                </div>
+                <div class="step animate-fade-in-up" style="animation-delay: 0.2s;">
+                    <div class="step-loader"></div>
+                    <div class="step-number">2</div>
+                    <h3 class="feature-title">Track Daily Actions</h3>
+                    <p class="feature-desc">Log your food and workouts in seconds through our clean, modern interface accessible anywhere.</p>
+                </div>
+                <div class="step animate-fade-in-up" style="animation-delay: 0.3s;">
+                    <div class="step-number">3</div>
+                    <h3 class="feature-title">Analyze & Adapt</h3>
+                    <p class="feature-desc">Review your progress through interactive charts and get intelligent recommendations to adjust your routine.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-col">
+                    <a href="index.html" class="brand" style="margin-bottom: 20px;">
+                        <i class="fa-solid fa-heart-pulse brand-icon"></i>
+                        FitTrack
+                    </a>
+                    <p style="color: var(--text-light); margin-bottom: 20px;">Empowering individuals to take control of their health through intelligent, data-driven insights.</p>
+                    <div class="social-links" style="display: flex; gap: 16px;">
+                        <a href="#"><i class="fa-brands fa-twitter fa-lg"></i></a>
+                        <a href="#"><i class="fa-brands fa-instagram fa-lg"></i></a>
+                        <a href="#"><i class="fa-brands fa-facebook fa-lg"></i></a>
+                    </div>
+                </div>
+                <div class="footer-col">
+                    <h4>Product</h4>
+                    <ul>
+                        <li><a href="#features">Features</a></li>
+                        <li><a href="#how-it-works">How it Works</a></li>
+                        <li><a href="#">Pricing</a></li>
+                        <li><a href="#">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Fitness Guide</a></li>
+                        <li><a href="#">Nutrition Tips</a></li>
+                        <li><a href="#">Community</a></li>
+                    </ul>
+                </div>
+                <div class="footer-col">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                        <li><a href="#">Cookie Policy</a></li>
+                        <li><a href="#">Contact Us</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 FitTrack. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/utils.js"></script>
+    <script>
+        // Navbar Scrolled Effect
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+    </script>
+</body>
+</html>
+

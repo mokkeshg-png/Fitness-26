@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Workout Plans - FitTrack</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .plan-header {
+            background: linear-gradient(135deg, var(--secondary), #f56b9c);
+            padding: 40px;
+            border-radius: var(--radius);
+            color: white;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .plan-header::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 300px;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transform: translate(30%, -30%);
+        }
+
+        .plan-header h2 {
+            font-size: 2rem;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .plan-header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .routine-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 24px;
+        }
+
+        .routine-card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 24px;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow-sm);
+            transition: transform var(--transition), box-shadow var(--transition);
+        }
+
+        .routine-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .routine-day {
+            display: inline-block;
+            padding: 4px 12px;
+            background: rgba(233, 30, 99, 0.1);
+            color: var(--secondary);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .routine-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 8px;
+        }
+
+        .routine-exercises {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(150, 150, 150, 0.1);
+            list-style: none;
+        }
+
+        .routine-exercises li {
+            font-size: 0.95rem;
+            color: var(--text-light);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .routine-exercises li i {
+            color: var(--secondary);
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <a href="dashboard.html" class="brand">
+                <i class="fa-solid fa-heart-pulse brand-icon"></i>
+                <span>FitTrack</span>
+            </a>
+            
+            <nav class="sidebar-menu">
+                <a href="dashboard.html" class="menu-item">
+                    <i class="fa-solid fa-house"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="food-log.html" class="menu-item">
+                    <i class="fa-solid fa-utensils"></i>
+                    <span>Food Log</span>
+                </a>
+                <a href="workout-log.html" class="menu-item">
+                    <i class="fa-solid fa-dumbbell"></i>
+                    <span>Workouts</span>
+                </a>
+                <a href="progress.html" class="menu-item">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>Progress</span>
+                </a>
+                <a href="diet-plan.html" class="menu-item">
+                    <i class="fa-solid fa-leaf"></i>
+                    <span>Diet Plans</span>
+                </a>
+                <a href="workout-plan.html" class="menu-item active">
+                    <i class="fa-solid fa-person-running"></i>
+                    <span>Routines</span>
+                </a>
+                <a href="bmi-calculator.html" class="menu-item">
+                    <i class="fa-solid fa-calculator"></i>
+                    <span>BMI Calculator</span>
+                </a>
+                <a href="food-database.html" class="menu-item">
+                    <i class="fa-solid fa-book-open"></i>
+                    <span>Food Explorer</span>
+                </a>
+            </nav>
+
+            <div style="margin-top: auto;">
+                <a href="profile.html" class="menu-item">
+                    <i class="fa-solid fa-gear"></i>
+                    <span>Settings</span>
+                </a>
+                <a href="#" class="menu-item logout" onclick="api.logout()">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="page-header animate-fade-in-up">
+                <div class="page-title">
+                    <h1>Workout Routines 💪</h1>
+                    <p>Curated exercise plans tailored to your goal.</p>
+                </div>
+                <div class="header-actions">
+                    <button type="button" class="theme-toggle" id="themeToggle">
+                        <i class="fa-solid fa-moon"></i>
+                    </button>
+                    <div class="profile-dropdown" onclick="window.location.href='profile.html'">
+                        <div class="avatar" id="userAvatar">U</div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="plan-header animate-fade-in-up" id="planHeader">
+                <h2>Generating your personalized routine...</h2>
+                <p>Based on your current goal and metrics.</p>
+            </div>
+
+            <div class="routine-grid" id="routineGrid">
+                <!-- Javascript will populate this based on user's goal -->
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/api.js"></script>
+    <script src="js/utils.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = api.getCurrentUser();
+            if (!user) return;
+
+            const avatar = document.getElementById('userAvatar');
+            if(avatar) avatar.innerText = user.fullName.charAt(0).toUpperCase();
+
+            const header = document.getElementById('planHeader');
+            const grid = document.getElementById('routineGrid');
+
+            let title, desc, routines;
+
+            if (user.fitnessGoal === 'weight_loss') {
+                title = `HIIT & Cardio Fat Burn Routine`;
+                desc = "High intensity routines designed to maximize calorie burn and metabolic rate.";
+                routines = [
+                    { day: 'Day 1 - Full Body HIIT', name: 'Metabolic Engine', ex: ['Jumping Jacks 30s', 'Burpees 30s', 'High Knees 30s', 'Mountain Climbers 30s', 'Rest 60s - Repeat 4x'] },
+                    { day: 'Day 2 - LISS Cardio', name: 'Active Recovery', ex: ['45 min brisk walk or light jog', 'Maintain heart rate at 60-70% max', 'Cool-down stretching 10 min'] },
+                    { day: 'Day 3 - Core & Fat Burn', name: 'Ab Shredder', ex: ['Crunches 20x', 'Russian Twists 30x', 'Plank 60s', 'Bicycle Crunches 30x', 'Rest 45s - Repeat 3x'] },
+                    { day: 'Day 4 - Rest', name: 'Recovery', ex: ['Light Yoga', 'Hydrate deeply', 'Mobility work'] }
+                ];
+            } else if (user.fitnessGoal === 'weight_gain') {
+                title = `Hypertrophy Muscle Builder`;
+                desc = "Progressive overload focused strength training to build dense muscle mass.";
+                routines = [
+                    { day: 'Day 1 - Push', name: 'Chest, Shoulders & Triceps', ex: ['Bench Press 4x8', 'Overhead Press 3x10', 'Incline Dumbbell Press 3x12', 'Tricep Pushdowns 3x15'] },
+                    { day: 'Day 2 - Pull', name: 'Back & Biceps', ex: ['Deadlift 3x5', 'Pull-ups 3x8', 'Barbell Rows 3x10', 'Bicep Curls 3x15'] },
+                    { day: 'Day 3 - Legs', name: 'Quads & Hamstrings', ex: ['Squats 4x8', 'Leg Press 3x12', 'Romanian Deadlift 3x10', 'Calf Raises 4x15'] },
+                    { day: 'Day 4 - Rest', name: 'Recovery', ex: ['Eat protein', 'Hydrate', 'Sleep 8 hours'] }
+                ];
+            } else {
+                title = `Functional Fitness & Maintenance`;
+                desc = "A balanced mix of strength, cardio, and mobility for overall longevity.";
+                routines = [
+                    { day: 'Day 1 - Upper Body', name: 'Strength & Tone', ex: ['Push-ups 3x15', 'Dumbbell Rows 3x12', 'Shoulder Press 3x12', 'Plank 60s'] },
+                    { day: 'Day 2 - Lower Body', name: 'Power & Balance', ex: ['Goblet Squats 3x15', 'Lunges 3x12 each', 'Glute Bridges 3x20'] },
+                    { day: 'Day 3 - Cardio', name: 'Heart Health', ex: ['30 min moderate cycling', '15 min rowing', '5 min cool down'] },
+                    { day: 'Day 4 - Rest', name: 'Active Recovery', ex: ['Stretching', 'Foam rolling', 'Light walk'] }
+                ];
+            }
+
+            header.innerHTML = `
+                <h2>${title}</h2>
+                <p>${desc}</p>
+            `;
+
+            grid.innerHTML = routines.map((r, i) => `
+                <div class="routine-card animate-fade-in-up" style="animation-delay: ${0.1 * (i+1)}s;">
+                    <div class="routine-day">${r.day}</div>
+                    <h3>${r.name}</h3>
+                    <ul class="routine-exercises">
+                        ${r.ex.map(item => `<li><i class="fa-solid fa-check"></i> ${item}</li>`).join('')}
+                    </ul>
+                </div>
+            `).join('');
+        });
+    </script>
+</body>
+</html>
+

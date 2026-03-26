@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile & Settings - FitTrack</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/forms.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .profile-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .profile-header-card {
+            background: var(--surface);
+            padding: 40px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--glass-border);
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .profile-avatar-large {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            color: white;
+            font-family: var(--font-heading);
+            font-weight: 700;
+            margin: 0 auto 20px;
+            box-shadow: 0 10px 20px rgba(110, 86, 207, 0.3);
+        }
+
+        .profile-header-card h2 {
+            font-size: 1.8rem;
+            margin-bottom: 8px;
+        }
+
+        .profile-header-card p {
+            color: var(--text-light);
+            margin-bottom: 20px;
+        }
+
+        .settings-section {
+            background: var(--surface);
+            padding: 30px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--glass-border);
+            margin-bottom: 30px;
+        }
+
+        .settings-section h3 {
+            margin-bottom: 24px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(150, 150, 150, 0.1);
+        }
+
+        .goal-badge {
+            display: inline-block;
+            padding: 6px 16px;
+            background: rgba(29, 185, 84, 0.1);
+            color: var(--success);
+            border-radius: 20px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <a href="dashboard.html" class="brand">
+                <i class="fa-solid fa-heart-pulse brand-icon"></i>
+                <span>FitTrack</span>
+            </a>
+            
+            <nav class="sidebar-menu">
+                <a href="dashboard.html" class="menu-item">
+                    <i class="fa-solid fa-house"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="food-log.html" class="menu-item">
+                    <i class="fa-solid fa-utensils"></i>
+                    <span>Food Log</span>
+                </a>
+                <a href="workout-log.html" class="menu-item">
+                    <i class="fa-solid fa-dumbbell"></i>
+                    <span>Workouts</span>
+                </a>
+                <a href="progress.html" class="menu-item">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>Progress</span>
+                </a>
+                <a href="diet-plan.html" class="menu-item">
+                    <i class="fa-solid fa-leaf"></i>
+                    <span>Diet Plans</span>
+                </a>
+                <a href="workout-plan.html" class="menu-item">
+                    <i class="fa-solid fa-person-running"></i>
+                    <span>Routines</span>
+                </a>
+                <a href="bmi-calculator.html" class="menu-item">
+                    <i class="fa-solid fa-calculator"></i>
+                    <span>BMI Calculator</span>
+                </a>
+                <a href="food-database.html" class="menu-item">
+                    <i class="fa-solid fa-book-open"></i>
+                    <span>Food Explorer</span>
+                </a>
+            </nav>
+
+            <div style="margin-top: auto;">
+                <a href="profile.html" class="menu-item active">
+                    <i class="fa-solid fa-gear"></i>
+                    <span>Settings</span>
+                </a>
+                <a href="#" class="menu-item logout" onclick="api.logout()">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="page-header animate-fade-in-up">
+                <div class="page-title">
+                    <h1>Profile & Settings ⚙️</h1>
+                    <p>Manage your account, body metrics, and visual preferences.</p>
+                </div>
+                <div class="header-actions">
+                    <button type="button" class="theme-toggle" id="themeToggle">
+                        <i class="fa-solid fa-moon"></i>
+                    </button>
+                    <div class="profile-dropdown">
+                        <div class="avatar" id="userAvatar">U</div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="profile-container">
+                <!-- Header Card -->
+                <div class="profile-header-card animate-fade-in-up" style="animation-delay: 0.1s;">
+                    <div class="profile-avatar-large" id="largeAvatar">U</div>
+                    <h2 id="profileName">User Name</h2>
+                    <p id="profileEmail">user@example.com</p>
+                    <div class="goal-badge" id="profileGoal">Weight Loss</div>
+                    <div style="margin-top: 10px; font-weight: bold; color: var(--primary);">
+                        Daily Target: <span id="profileCalories">2000</span> kcal
+                    </div>
+                </div>
+
+                <!-- Update Metrics -->
+                <div class="settings-section animate-fade-in-up" style="animation-delay: 0.2s;">
+                    <h3>Update Body Metrics</h3>
+                    <form id="metricsForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label">Height (cm)</label>
+                                <input type="number" id="updHeight" class="form-control" required min="100" max="250">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Weight (kg)</label>
+                                <input type="number" id="updWeight" class="form-control" step="0.1" required min="30" max="300">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Fitness Goal</label>
+                            <select id="updGoal" class="form-control" required>
+                                <option value="weight_loss">Weight Loss</option>
+                                <option value="maintain">Maintain Weight</option>
+                                <option value="weight_gain">Weight Gain</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary" id="saveMetricsBtn">
+                            Update Metrics & Recalculate Target
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Preferences -->
+                <div class="settings-section animate-fade-in-up" style="animation-delay: 0.3s;">
+                    <h3>Preferences</h3>
+                    <div class="form-group" style="display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <strong>Dark Mode</strong>
+                            <p style="color: var(--text-light); font-size: 0.9rem; margin-top: 4px;">Toggle dark/light theme for the application.</p>
+                        </div>
+                        <label class="switch" style="position: relative; display: inline-block; width: 50px; height: 26px;">
+                            <input type="checkbox" id="themeSwitch" style="opacity: 0; width: 0; height: 0;">
+                            <span class="slider" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--bg-color); transition: .4s; border-radius: 34px; border: 1px solid var(--glass-border);">
+                                <span class="slider-btn" style="position: absolute; content: ''; height: 18px; width: 18px; left: 4px; bottom: 3px; background-color: var(--primary); transition: .4s; border-radius: 50%;"></span>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/api.js"></script>
+    <script src="js/utils.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const user = api.getCurrentUser();
+            if (!user) return;
+
+            document.getElementById('userAvatar').innerText = user.fullName.charAt(0).toUpperCase();
+            document.getElementById('largeAvatar').innerText = user.fullName.charAt(0).toUpperCase();
+            document.getElementById('profileName').innerText = user.fullName;
+            document.getElementById('profileEmail').innerText = user.email;
+            
+            const goalText = { 'weight_loss': 'Weight Loss', 'maintain': 'Maintenance', 'weight_gain': 'Weight Gain' };
+            document.getElementById('profileGoal').innerText = goalText[user.fitnessGoal] || user.fitnessGoal;
+            document.getElementById('profileCalories').innerText = user.daily_cal_goal;
+
+            document.getElementById('updHeight').value = user.height;
+            document.getElementById('updWeight').value = user.weight;
+            document.getElementById('updGoal').value = user.fitnessGoal;
+
+            const metricsForm = document.getElementById('metricsForm');
+            metricsForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const btn = document.getElementById('saveMetricsBtn');
+                btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Saving...';
+
+                setTimeout(() => {
+                    const hw = parseFloat(document.getElementById('updHeight').value);
+                    const ww = parseFloat(document.getElementById('updWeight').value);
+                    const gg = document.getElementById('updGoal').value;
+
+                    user.height = hw;
+                    user.weight = ww;
+                    user.fitnessGoal = gg;
+                    user.daily_cal_goal = api.calculateDailyCalorieGoal(ww, hw, gg);
+
+                    api.updateCurrentUser(user);
+
+                    showNotification('Metrics updated and targets recalculated.', 'success');
+                    
+                    // Update UI immediately
+                    document.getElementById('profileGoal').innerText = goalText[user.fitnessGoal];
+                    document.getElementById('profileCalories').innerText = user.daily_cal_goal;
+
+                    btn.innerHTML = 'Update Metrics & Recalculate Target';
+                }, 500);
+            });
+
+            // Theme Switch sync
+            const themeSwitch = document.getElementById('themeSwitch');
+            const sliderBtn = themeSwitch.parentElement.querySelector('.slider-btn');
+            
+            const syncThemeToggle = () => {
+                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                themeSwitch.checked = isDark;
+                sliderBtn.style.transform = isDark ? 'translateX(22px)' : 'translateX(0)';
+            };
+
+            syncThemeToggle();
+
+            themeSwitch.addEventListener('change', () => {
+                toggleTheme(); // defined in utils.js
+                syncThemeToggle();
+            });
+
+            // Also keep main header toggle in sync
+            document.getElementById('themeToggle').addEventListener('click', () => {
+                setTimeout(syncThemeToggle, 50);
+            });
+        });
+    </script>
+</body>
+</html>
+

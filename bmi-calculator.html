@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BMI Calculator - FitTrack</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="css/forms.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .bmi-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .bmi-card {
+            background: var(--surface);
+            padding: 40px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border: 1px solid var(--glass-border);
+            text-align: center;
+        }
+
+        .bmi-result-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            margin: 0 auto 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            border: 8px solid rgba(150, 150, 150, 0.1);
+            transition: border-color var(--transition);
+        }
+
+        .bmi-value {
+            font-size: 2.5rem;
+            font-family: var(--font-heading);
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+
+        .bmi-category {
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .bmi-scale {
+            display: flex;
+            height: 8px;
+            border-radius: 4px;
+            margin: 30px 0 10px;
+            overflow: hidden;
+        }
+
+        .scale-segment {
+            height: 100%;
+        }
+
+        .scale-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-light);
+            margin-bottom: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-layout">
+        <aside class="sidebar">
+            <a href="dashboard.html" class="brand">
+                <i class="fa-solid fa-heart-pulse brand-icon"></i>
+                <span>FitTrack</span>
+            </a>
+            
+            <nav class="sidebar-menu">
+                <a href="dashboard.html" class="menu-item">
+                    <i class="fa-solid fa-house"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="food-log.html" class="menu-item">
+                    <i class="fa-solid fa-utensils"></i>
+                    <span>Food Log</span>
+                </a>
+                <a href="workout-log.html" class="menu-item">
+                    <i class="fa-solid fa-dumbbell"></i>
+                    <span>Workouts</span>
+                </a>
+                <a href="progress.html" class="menu-item">
+                    <i class="fa-solid fa-chart-line"></i>
+                    <span>Progress</span>
+                </a>
+                <a href="diet-plan.html" class="menu-item">
+                    <i class="fa-solid fa-leaf"></i>
+                    <span>Diet Plans</span>
+                </a>
+                <a href="workout-plan.html" class="menu-item">
+                    <i class="fa-solid fa-person-running"></i>
+                    <span>Routines</span>
+                </a>
+                <a href="bmi-calculator.html" class="menu-item active">
+                    <i class="fa-solid fa-calculator"></i>
+                    <span>BMI Calculator</span>
+                </a>
+                <a href="food-database.html" class="menu-item">
+                    <i class="fa-solid fa-book-open"></i>
+                    <span>Food Explorer</span>
+                </a>
+            </nav>
+
+            <div style="margin-top: auto;">
+                <a href="profile.html" class="menu-item">
+                    <i class="fa-solid fa-gear"></i>
+                    <span>Settings</span>
+                </a>
+                <a href="#" class="menu-item logout" onclick="api.logout()">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="page-header animate-fade-in-up">
+                <div class="page-title">
+                    <h1>BMI Calculator 🧮</h1>
+                    <p>Calculate your Body Mass Index instantly.</p>
+                </div>
+                <div class="header-actions">
+                    <button type="button" class="theme-toggle" id="themeToggle">
+                        <i class="fa-solid fa-moon"></i>
+                    </button>
+                    <div class="profile-dropdown" onclick="window.location.href='profile.html'">
+                        <div class="avatar" id="userAvatar">U</div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="bmi-container animate-fade-in-up" style="animation-delay: 0.1s;">
+                <div class="bmi-card">
+                    <div class="bmi-result-circle" id="bmiCircle">
+                        <div class="bmi-value" id="bmiValue">--.-</div>
+                        <div class="bmi-category" id="bmiCategory">Enter details</div>
+                    </div>
+
+                    <form id="bmiForm">
+                        <div class="form-row" style="text-align: left;">
+                            <div class="form-group">
+                                <label class="form-label">Height (cm)</label>
+                                <input type="number" id="bmiHeight" class="form-control" required min="100" max="250">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Weight (kg)</label>
+                                <input type="number" id="bmiWeight" class="form-control" step="0.1" required min="30" max="300">
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block" style="margin-top: 20px;">
+                            Calculate BMI
+                        </button>
+                    </form>
+
+                    <!-- Scale visualization -->
+                    <div class="bmi-scale">
+                        <div class="scale-segment" style="width: 25%; background: var(--warning); opacity: 0.7;" title="Underweight"></div>
+                        <div class="scale-segment" style="width: 30%; background: var(--success);" title="Normal"></div>
+                        <div class="scale-segment" style="width: 20%; background: var(--warning);" title="Overweight"></div>
+                        <div class="scale-segment" style="width: 25%; background: var(--danger);" title="Obese"></div>
+                    </div>
+                    <div class="scale-labels">
+                        <span>&lt; 18.5</span>
+                        <span>18.5 - 24.9</span>
+                        <span>25.0 - 29.9</span>
+                        <span>&ge; 30.0</span>
+                    </div>
+
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/api.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/bmi-calculator.js"></script>
+</body>
+</html>
+
