@@ -9,7 +9,7 @@ const SUPABASE_URL = 'https://ruksaybvkfnqdkvrjesh.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ1a3NheWJ2a2ZucWRrdnJqZXNoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0NDI2OTEsImV4cCI6MjA5MDAxODY5MX0.eHazax-OEbSoR457UnVOBZAomm1DYTh45slOmjAsby4';
 
 // PYTHON BACKEND CONFIGURATION
-const BACKEND_URL = 'http://localhost:8000';
+const BACKEND_URL = 'http://localhost:8000'; // Change to your public URL (e.g. Render) for production
 const USE_PYTHON_BACKEND = true; 
 
 // Use var to ensure global scope attachment in non-module scripts

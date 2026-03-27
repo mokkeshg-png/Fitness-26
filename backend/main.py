@@ -114,15 +114,21 @@ async def update_profile(updates: UserUpdate, user = Depends(get_user_from_token
 # --- TRACKING ---
 @app.get("/tracking/daily-summary/{date}")
 async def get_daily_summary(date: str, user = Depends(get_user_from_token)):
-    profile = (supabase.table("users").select("daily_cal_goal").eq("id", user.id).single().execute()).data
+    try:
+        profile_resp = supabase.table("users").select("daily_cal_goal").eq("id", user.id).single().execute()
+        goal = profile_resp.data.get("daily_cal_goal", 2000) if profile_resp.data else 2000
+    except Exception:
+        goal = 2000
+
     food_response = supabase.table("food_logs").select("calories").eq("user_id", user.id)\
         .gte("consumed_at", f"{date}T00:00:00").lte("consumed_at", f"{date}T23:59:59").execute()
     workout_response = supabase.table("workouts").select("calories_burned").eq("user_id", user.id)\
         .gte("completed_at", f"{date}T00:00:00").lte("completed_at", f"{date}T23:59:59").execute()
-    consumed = sum(row["calories"] for row in food_response.data)
-    burned = sum(row["calories_burned"] for row in workout_response.data)
+        
+    consumed = sum(row.get("calories", 0) for row in food_response.data) if food_response.data else 0
+    burned = sum(row.get("calories_burned", 0) for row in workout_response.data) if workout_response.data else 0
     net = consumed - burned
-    goal = profile["daily_cal_goal"]
+
     return {
         "calorie_goal": goal,
         "total_consumed": consumed,

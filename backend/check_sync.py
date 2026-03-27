@@ -6,12 +6,12 @@ import time
 load_dotenv()
 
 # Configuration
-BACKEND_URL = f"http://localhost:{os.getenv('PORT', '8000')}"
-SUPABASE_URL = os.getenv("SUPABASE_URL")
+BACKEND_URL = os.getenv("BACKEND_URL", f"http://localhost:{os.getenv('PORT', '8000')}")
+SUPABASE_URL = os.getenv("SUPABASE_URL", "https://ruksaybvkfnqdkvrjesh.supabase.co")
 
 def print_banner():
-    print("\n" + "="*50)
-    print("   🚀 FITTRACK SYSTEM CONNECTIVITY CHECKER   ")
+    print("\n" + "="*50) 
+    print("   [SYSTEM] FITTRACK SYSTEM CONNECTIVITY CHECKER   ")
     print("="*50 + "\n")
 
 def check_backend():
@@ -20,16 +20,16 @@ def check_backend():
         response = requests.get(f"{BACKEND_URL}/health", timeout=5)
         if response.status_code == 200:
             data = response.json()
-            print(" ✅ ONLINE")
+            print(" [OK]")
             print(f"    - API Status: {data.get('api_status', 'N/A')}")
             print(f"    - Supabase Connectivity: {data.get('supabase_connection', 'N/A')}")
             return True
         else:
-            print(f" ❌ ERROR (Status {response.status_code})")
+            print(f" [ERROR] (Status {response.status_code})")
     except requests.exceptions.ConnectionError:
-        print(" ❌ OFFLINE (Is the backend running?)")
+        print(" [OFFLINE] (Is the backend running?)")
     except Exception as e:
-        print(f" ❌ ERROR: {str(e)}")
+        print(f" [ERROR]: {str(e)}")
     return False
 
 def check_supabase_direct():
@@ -38,12 +38,12 @@ def check_supabase_direct():
         # Check if the URL is reachable
         response = requests.get(f"{SUPABASE_URL}/rest/v1/", timeout=5)
         if response.status_code in [200, 401]: # 401 is expected if no key is provided, but it means server is up
-            print(" ✅ REACHABLE")
+            print(" [REACHABLE]")
             return True
         else:
-            print(f" ❌ UNREACHABLE (Status {response.status_code})")
+            print(f" [UNREACHABLE] (Status {response.status_code})")
     except Exception as e:
-        print(f" ❌ ERROR: {str(e)}")
+        print(f" [ERROR]: {str(e)}")
     return False
 
 def check_frontend_config():
@@ -53,12 +53,12 @@ def check_frontend_config():
         with open(api_js_path, 'r', encoding='utf-8') as f:
             content = f.read()
             if "BACKEND_URL" in content and SUPABASE_URL in content:
-                print(" ✅ CONFIGURED")
+                print(" [CONFIGURED]")
                 return True
             else:
-                print(" ⚠️ MISCONFIGURED (Missing URL or Backend Link)")
+                print(" [MISCONFIGURED] (Missing URL or Backend Link)")
     else:
-        print(" ❌ FILE MISSING")
+        print(" [FILE MISSING]")
     return False
 
 def main():
@@ -70,9 +70,9 @@ def main():
     
     print("\n" + "="*50)
     if s1 and s2 and s3:
-        print(" 🎉 SUCCESS: Everything is syncronized correctly!")
+        print(" [SUCCESS] Everything is synchronized correctly!")
     else:
-        print(" ⚠️ WARNING: Some components are not connected correctly.")
+        print(" [WARNING] Some components are not connected correctly.")
         print("    Please follow the troubleshooting steps below.")
     print("="*50)
     
