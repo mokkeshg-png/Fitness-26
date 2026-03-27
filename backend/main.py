@@ -51,6 +51,10 @@ class WorkoutEntry(BaseModel):
     calories_burned: int
     completed_at: Optional[str] = None
 
+class WeightLogEntry(BaseModel):
+    weight_kg: float
+    logged_at: Optional[str] = None
+
 # Business Logic Helpers
 def calculate_daily_calorie_goal(weight: float, height: float, goal: str) -> int:
     bmr = (10 * weight) + (6.25 * height) - (5 * 30) + 5
@@ -153,6 +157,26 @@ async def log_workout(entry: WorkoutEntry, user = Depends(get_user_from_token)):
     response = supabase.table("workouts").insert([data]).execute()
     return response.data[0]
 
+@app.post("/tracking/weight")
+async def log_weight(entry: WeightLogEntry, user = Depends(get_user_from_token)):
+    data = entry.model_dump()
+    data["user_id"] = str(user.id)
+    if not data["logged_at"]: data["logged_at"] = datetime.utcnow().isoformat()
+    # Update profile weight too
+    supabase.table("users").update({"weight_kg": entry.weight_kg}).eq("id", user.id).execute()
+    response = supabase.table("weight_logs").insert([data]).execute()
+    return response.data[0]
+
+@app.delete("/tracking/food/{id}")
+async def delete_food(id: str, user = Depends(get_user_from_token)):
+    response = supabase.table("food_logs").delete().eq("id", id).eq("user_id", user.id).execute()
+    return {"status": "success"}
+
+@app.delete("/tracking/workout/{id}")
+async def delete_workout(id: str, user = Depends(get_user_from_token)):
+    response = supabase.table("workouts").delete().eq("id", id).eq("user_id", user.id).execute()
+    return {"status": "success"}
+
 # --- ANALYTICS ---
 @app.get("/analytics/bmi")
 async def calculate_bmi(user = Depends(get_user_from_token)):
@@ -166,6 +190,25 @@ async def calculate_bmi(user = Depends(get_user_from_token)):
     elif bmi < 30: category = "Overweight"
     else: category = "Obese"
     return {"bmi": round(bmi, 1), "category": category}
+
+@app.get("/analytics/history")
+async def get_history(days: int = 30, user = Depends(get_user_from_token)):
+    from datetime import timedelta
+    end_date = datetime.utcnow()
+    start_date = end_date - timedelta(days=days)
+    
+    # Fetch food logs for period
+    food_resp = supabase.table("food_logs").select("calories, consumed_at").eq("user_id", user.id)\
+        .gte("consumed_at", start_date.isoformat()).execute()
+    
+    # Fetch workouts for period
+    workout_resp = supabase.table("workouts").select("calories_burned, completed_at").eq("user_id", user.id)\
+        .gte("completed_at", start_date.isoformat()).execute()
+        
+    return {
+        "food_logs": food_resp.data,
+        "workouts": workout_resp.data
+    }
 
 if __name__ == "__main__":
     import uvicorn

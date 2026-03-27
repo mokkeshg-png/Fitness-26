@@ -11,25 +11,55 @@ document.addEventListener('DOMContentLoaded', async () => {
     Chart.defaults.color = getComputedStyle(document.documentElement).getPropertyValue('--text-light').trim() || '#888';
     Chart.defaults.font.family = "'Inter', sans-serif";
     
-    // We will generate fake 30-day historical data for demonstration purposes
-    const dates = generateDates(30);
-    const weightData = generateWeightData(user.weight, 30, user.fitnessGoal);
-    const calorieData = generateCalorieData(user.daily_cal_goal, 30);
-    const workoutData = generateWorkoutData(30);
+    // Fetch Real History Data
+    const days = 30;
+    const history = await api.getAnalyticsHistory(days);
+    const dates = generateDates(days);
+    
+    // Process Data
+    const calorieData = processHistoricalCalories(history.food_logs, dates, days);
+    const workoutData = processHistoricalWorkouts(history.workouts, dates, days);
+    
+    // Weight data is still currently mock until weight_logs table is integrated, 
+    // but we can use the current weight as the latest point
+    const weightTrend = generateWeightData(user.weight, days, user.fitnessGoal);
 
     // Initialize Charts
-    initWeightChart(dates, weightData);
+    initWeightChart(dates, weightTrend);
     initCalorieChart(dates, calorieData, user.daily_cal_goal);
     initMacroChart();
     initWorkoutChart(dates, workoutData);
-
-    // Listen for theme changes to update chart colors dynamically
-    window.addEventListener('themeChanged', () => {
-        // A simple reload is easiest to reset Chart.js variables based on new CSS variables
-        // if this was a production app, we would dynamically update chart instances
-        // location.reload();
-    });
 });
+
+function processHistoricalCalories(logs, labels, days) {
+    const data = new Array(days).fill(0);
+    const today = new Date();
+    
+    logs.forEach(log => {
+        const logDate = new Date(log.consumed_at);
+        const diffTime = Math.abs(today - logDate);
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        if (diffDays < days) {
+            data[days - 1 - diffDays] += parseInt(log.calories);
+        }
+    });
+    return data;
+}
+
+function processHistoricalWorkouts(logs, labels, days) {
+    const data = new Array(days).fill(0);
+    const today = new Date();
+    
+    logs.forEach(log => {
+        const logDate = new Date(log.completed_at);
+        const diffTime = Math.abs(today - logDate);
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        if (diffDays < days) {
+            data[days - 1 - diffDays] += parseInt(log.calories_burned);
+        }
+    });
+    return data;
+}
 
 // Helper: Generate array of last N days formatted as "MMM DD"
 function generateDates(n) {

@@ -13,9 +13,9 @@ const BACKEND_URL = 'http://localhost:8000'; // Change to your public URL (e.g. 
 const USE_PYTHON_BACKEND = true; 
 
 // Use var to ensure global scope attachment in non-module scripts
-var supabase = null;
+var supabaseClient = null;
 if (typeof window.supabase !== 'undefined') {
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     console.log('✅ Supabase initialized successfully.');
 } else {
     console.error('❌ Supabase dependency missing! Check CDN script tag.');
@@ -23,14 +23,14 @@ if (typeof window.supabase !== 'undefined') {
 
 class FitTrackAPI {
     constructor() {
-        if (!supabase) {
+        if (!supabaseClient) {
             console.error('Supabase client not loaded. Please check CDN import.');
         }
     }
 
     async getAuthHeaders() {
-        if (!supabase) return {};
-        const { data: { session } } = await supabase.auth.getSession();
+        if (!supabaseClient) return {};
+        const { data: { session } } = await supabaseClient.auth.getSession();
         if (!session) return {};
         return {
             'Authorization': `Bearer ${session.access_token}`,
@@ -41,7 +41,7 @@ class FitTrackAPI {
     // Auth
     async register(userData) {
         try {
-            const { data: authData, error: authError } = await supabase.auth.signUp({
+            const { data: authData, error: authError } = await supabaseClient.auth.signUp({
                 email: userData.email,
                 password: userData.password,
                 options: { data: { full_name: userData.fullName } }
@@ -50,7 +50,7 @@ class FitTrackAPI {
             if (authError) throw authError;
 
             // Initialize profile
-            const { data: profile, error: profileError } = await supabase
+            const { data: profile, error: profileError } = await supabaseClient
                 .from('users')
                 .insert([{
                     id: authData.user.id,
@@ -73,7 +73,7 @@ class FitTrackAPI {
 
     async login(email, password) {
         try {
-            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+            const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
             if (error) throw error;
             return data.user;
         } catch (error) {
@@ -83,7 +83,7 @@ class FitTrackAPI {
     }
 
     async logout() {
-        await supabase.auth.signOut();
+        await supabaseClient.auth.signOut();
         window.location.href = 'login.html';
     }
 
@@ -107,10 +107,10 @@ class FitTrackAPI {
         }
 
         // Direct Fallback
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session } } = await supabaseClient.auth.getSession();
         if (!session) return null;
 
-        const { data: user, error } = await supabase.from('users').select('*').eq('id', session.user.id).single();
+        const { data: user, error } = await supabaseClient.from('users').select('*').eq('id', session.user.id).single();
         if (error) return null;
 
         return { ...user, fullName: user.full_name, height: user.height_cm, weight: user.weight_kg };
@@ -166,7 +166,7 @@ class FitTrackAPI {
         }
         // Direct Supabase insert as definitive fallback
         const user = await this.getCurrentUser();
-        const { data, error } = await supabase.from('food_logs').insert([{
+        const { data, error } = await supabaseClient.from('food_logs').insert([{
             user_id: user.id,
             food_name: foodData.food_name,
             calories: foodData.calories,
@@ -178,7 +178,27 @@ class FitTrackAPI {
     }
 
     async deleteFood(id) {
-        const { error } = await supabase.from('food_logs').delete().eq('id', id);
+        if (USE_PYTHON_BACKEND) {
+            try {
+                const headers = await this.getAuthHeaders();
+                const res = await fetch(`${BACKEND_URL}/tracking/food/${id}`, { method: 'DELETE', headers });
+                if (res.ok) return true;
+            } catch (e) { console.error('Food delete sync error:', e); }
+        }
+        const { error } = await supabaseClient.from('food_logs').delete().eq('id', id);
+        if (error) throw error;
+        return true;
+    }
+
+    async deleteWorkout(id) {
+        if (USE_PYTHON_BACKEND) {
+            try {
+                const headers = await this.getAuthHeaders();
+                const res = await fetch(`${BACKEND_URL}/tracking/workout/${id}`, { method: 'DELETE', headers });
+                if (res.ok) return true;
+            } catch (e) { console.error('Workout delete sync error:', e); }
+        }
+        const { error } = await supabaseClient.from('workouts').delete().eq('id', id);
         if (error) throw error;
         return true;
     }
@@ -186,7 +206,7 @@ class FitTrackAPI {
     async getFoodLogs(date) {
         const user = await this.getCurrentUser();
         if (!user) return [];
-        const { data, error } = await supabase.from('food_logs')
+        const { data, error } = await supabaseClient.from('food_logs')
             .select('*').eq('user_id', user.id)
             .gte('consumed_at', `${date}T00:00:00`).lte('consumed_at', `${date}T23:59:59`);
         return error ? [] : data;
@@ -206,7 +226,7 @@ class FitTrackAPI {
         }
         // Direct Supabase insert as definitive fallback
         const user = await this.getCurrentUser();
-        const { data, error} = await supabase.from('workouts').insert([{
+        const { data, error} = await supabaseClient.from('workouts').insert([{
             user_id: user.id,
             workout_type: workoutData.workout_type,
             duration_min: workoutData.duration_min,
@@ -220,7 +240,7 @@ class FitTrackAPI {
     async getWorkouts(date) {
         const user = await this.getCurrentUser();
         if (!user) return [];
-        const { data, error } = await supabase.from('workouts')
+        const { data, error } = await supabaseClient.from('workouts')
             .select('*').eq('user_id', user.id)
             .gte('completed_at', `${date}T00:00:00`).lte('completed_at', `${date}T23:59:59`);
         return error ? [] : data;
@@ -251,6 +271,27 @@ class FitTrackAPI {
             remaining: user.daily_cal_goal - net
         };
     }
+
+    async getAnalyticsHistory(days = 30) {
+        if (USE_PYTHON_BACKEND) {
+            try {
+                const headers = await this.getAuthHeaders();
+                const res = await fetch(`${BACKEND_URL}/analytics/history?days=${days}`, { headers });
+                if (res.ok) return await res.json();
+            } catch (e) { console.error('History fetch error:', e); }
+        }
+        
+        // Fallback or Direct Supabase for history
+        const user = await this.getCurrentUser();
+        const start = new Date();
+        start.setDate(start.getDate() - days);
+        const isoStart = start.toISOString();
+
+        const { data: foods } = await supabaseClient.from('food_logs').select('calories, consumed_at').eq('user_id', user.id).gte('consumed_at', isoStart);
+        const { data: workouts } = await supabaseClient.from('workouts').select('calories_burned, completed_at').eq('user_id', user.id).gte('completed_at', isoStart);
+        
+        return { food_logs: foods || [], workouts: workouts || [] };
+    }
 }
 
 // Initialize globally
@@ -265,8 +306,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const checkAuth = async () => {
         const isPublic = publicPages.includes(currentPage);
-        if (!supabase) return;
-        const { data: { session } } = await supabase.auth.getSession();
+        if (!supabaseClient) return;
+        const { data: { session } } = await supabaseClient.auth.getSession();
         const user = session ? session.user : null;
 
         if (!isPublic && !user) {

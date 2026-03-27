@@ -49,6 +49,9 @@ def check_supabase_direct():
 def check_frontend_config():
     print("[*] Checking Frontend Configuration (js/api.js)...", end="", flush=True)
     api_js_path = os.path.join("..", "js", "api.js")
+    if not os.path.exists(api_js_path):
+        api_js_path = os.path.join("js", "api.js")
+
     if os.path.exists(api_js_path):
         with open(api_js_path, 'r', encoding='utf-8') as f:
             content = f.read()

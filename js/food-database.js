@@ -1,9 +1,17 @@
 // js/food-database.js
 
 document.addEventListener('DOMContentLoaded', async () => {
-    const user = await api.getCurrentUser();
-    if(user && document.getElementById('userAvatar')) {
-        document.getElementById('userAvatar').innerText = user.fullName.charAt(0).toUpperCase();
+    // Render foods immediately
+    renderFoods(foodDatabase);
+
+    // Then update user info if logged in
+    try {
+        const user = await api.getCurrentUser();
+        if(user && document.getElementById('userAvatar')) {
+            document.getElementById('userAvatar').innerText = user.fullName.charAt(0).toUpperCase();
+        }
+    } catch (e) {
+        console.error('User fetch failed:', e);
     }
 
     const foodDatabase = [
@@ -467,6 +475,5 @@ document.addEventListener('DOMContentLoaded', async () => {
     closeModalBtn.addEventListener('click', () => { modal.classList.remove('active'); });
     modal.addEventListener('click', (e) => { if(e.target === modal) modal.classList.remove('active'); });
 
-    renderFoods(foodDatabase);
 });
 

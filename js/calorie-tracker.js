@@ -212,8 +212,7 @@ async function loadWorkoutLogs(date) {
                     <td>${log.calories_burned} kcal</td>
                     <td>${timeStr}</td>
                     <td class="action-cell">
-                        <!-- Intentionally no delete for workouts implemented in api mock yet, but visual UI is there -->
-                        <button disabled style="opacity:0.3" title="Requires backend implementation"><i class="fa-solid fa-trash"></i></button>
+                        <button class="delete-workout-btn" data-id="${log.id}"><i class="fa-solid fa-trash"></i></button>
                     </td>
                 </tr>
             `;
@@ -222,4 +221,24 @@ async function loadWorkoutLogs(date) {
     
     if(totalEl) totalEl.innerText = `${total} kcal`;
 }
+
+// Global Event delegation for dynamic lists
+document.addEventListener('click', async (e) => {
+    if(e.target.closest('.delete-workout-btn')) {
+        const btn = e.target.closest('.delete-workout-btn');
+        const id = btn.getAttribute('data-id');
+        const dateInput = document.getElementById('logDate');
+        const date = dateInput ? dateInput.value : new Date().toISOString().split('T')[0];
+        
+        if(confirm('Delete this workout entry?')) {
+            try {
+                await api.deleteWorkout(id);
+                showNotification('Workout deleted', 'success');
+                loadWorkoutLogs(date);
+            } catch (err) {
+                showNotification('Error deleting workout', 'error');
+            }
+        }
+    }
+});
 
