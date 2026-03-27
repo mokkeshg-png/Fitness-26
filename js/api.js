@@ -12,10 +12,14 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 const BACKEND_URL = 'http://localhost:8000';
 const USE_PYTHON_BACKEND = true; 
 
-/** @type {import('@supabase/supabase-js').SupabaseClient} */
-const supabase = (typeof window.supabase !== 'undefined') 
-    ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
-    : null;
+// Use var to ensure global scope attachment in non-module scripts
+var supabase = null;
+if (typeof window.supabase !== 'undefined') {
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    console.log('✅ Supabase initialized successfully.');
+} else {
+    console.error('❌ Supabase dependency missing! Check CDN script tag.');
+}
 
 class FitTrackAPI {
     constructor() {
@@ -249,7 +253,10 @@ class FitTrackAPI {
     }
 }
 
-const api = new FitTrackAPI();
+// Initialize globally
+var api = new FitTrackAPI();
+window.api = api; // Explicit attachment to ensure visibility across all scripts
+console.log('✅ FitTrack API initialized.');
 
 // Route Protection Logic
 document.addEventListener('DOMContentLoaded', async () => {

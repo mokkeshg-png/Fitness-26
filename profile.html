@@ -212,8 +212,8 @@
     <script src="js/api.js"></script>
     <script src="js/utils.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const user = api.getCurrentUser();
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = await api.getCurrentUser();
             if (!user) return;
 
             document.getElementById('userAvatar').innerText = user.fullName.charAt(0).toUpperCase();
