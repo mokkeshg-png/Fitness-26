@@ -23,8 +23,24 @@ if (typeof window.supabase !== 'undefined') {
 
 class FitTrackAPI {
     constructor() {
+        this.backendOnline = null; 
+        this.userCache = null;
         if (!supabaseClient) {
             console.error('Supabase client not loaded. Please check CDN import.');
+        }
+    }
+
+    async checkBackend() {
+        if (!USE_PYTHON_BACKEND) return false;
+        if (this.backendOnline === true) return true;
+        
+        try {
+            const res = await fetch(`${BACKEND_URL}/health`, { method: 'GET' });
+            this.backendOnline = res.ok;
+            return this.backendOnline;
+        } catch (e) {
+            this.backendOnline = false;
+            return false;
         }
     }
 
@@ -41,30 +57,34 @@ class FitTrackAPI {
     // Auth
     async register(userData) {
         try {
+            // Include extra metadata for the trigger to pick up
             const { data: authData, error: authError } = await supabaseClient.auth.signUp({
                 email: userData.email,
                 password: userData.password,
-                options: { data: { full_name: userData.fullName } }
+                options: { 
+                    data: { 
+                        full_name: userData.fullName,
+                        height: userData.height,
+                        weight: userData.weight,
+                        fitnessGoal: userData.fitnessGoal
+                    } 
+                }
             });
 
             if (authError) throw authError;
 
-            // Initialize profile
-            const { data: profile, error: profileError } = await supabaseClient
-                .from('users')
-                .insert([{
-                    id: authData.user.id,
-                    full_name: userData.fullName,
-                    height_cm: userData.height,
-                    weight_kg: userData.weight,
-                    fitness_goal: userData.fitnessGoal,
-                    daily_cal_goal: this.calculateDailyCalorieGoal(userData.weight, userData.height, userData.fitnessGoal)
-                }])
-                .select().single();
-
-            if (profileError) throw profileError;
-
-            return { ...profile, fullName: profile.full_name, height: profile.height_cm, weight: profile.weight_kg };
+            // If session is null, either email confirmation is needed or auto-login is off
+            const { session } = authData;
+            
+            // If we have a session, we can attempt a manual profile sync, 
+            // but the database trigger handles it more reliably for both confirmed/unconfirmed.
+            // Still, we want to return the user state to the caller.
+            
+            return { 
+                user: authData.user, 
+                session: session,
+                needsConfirmation: !session
+            };
         } catch (error) {
             console.error('Registration error:', error);
             throw error;
@@ -87,37 +107,46 @@ class FitTrackAPI {
         window.location.href = 'login.html';
     }
 
-    async getCurrentUser() {
-        if (USE_PYTHON_BACKEND) {
+    async getCurrentUser(forceRefresh = false) {
+        if (!forceRefresh && this.userCache) return this.userCache;
+
+        const isBackendUp = await this.checkBackend();
+        if (isBackendUp) {
             try {
                 const headers = await this.getAuthHeaders();
                 if (headers.Authorization) {
-                    const res = await fetch(`${BACKEND_URL}/health`, { method: 'GET' }); // Quick ping
-                    if (res.ok) {
-                        const profileRes = await fetch(`${BACKEND_URL}/user/profile`, { headers });
-                        if (profileRes.ok) {
-                            const profile = await profileRes.json();
-                            return { ...profile, fullName: profile.full_name, height: profile.height_cm, weight: profile.weight_kg };
-                        }
+                    const profileRes = await fetch(`${BACKEND_URL}/user/profile`, { headers });
+                    if (profileRes.ok) {
+                        const profile = await profileRes.json();
+                        this.userCache = { ...profile, fullName: profile.full_name, height: profile.height_cm, weight: profile.weight_kg };
+                        return this.userCache;
                     }
                 }
             } catch (e) {
-                console.error('Backend unreachable, using direct Supabase:', e);
+                console.error('Backend fetch failed, falling back to Supabase:', e);
             }
         }
 
         // Direct Fallback
         const { data: { session } } = await supabaseClient.auth.getSession();
-        if (!session) return null;
+        if (!session) {
+            this.userCache = null;
+            return null;
+        }
 
         const { data: user, error } = await supabaseClient.from('users').select('*').eq('id', session.user.id).single();
-        if (error) return null;
+        if (error) {
+            this.userCache = null;
+            return null;
+        }
 
-        return { ...user, fullName: user.full_name, height: user.height_cm, weight: user.weight_kg };
+        this.userCache = { ...user, fullName: user.full_name, height: user.height_cm, weight: user.weight_kg };
+        return this.userCache;
     }
 
     async updateCurrentUser(updates) {
-        if (USE_PYTHON_BACKEND) {
+        const isBackendUp = await this.checkBackend();
+        if (isBackendUp) {
             try {
                 const headers = await this.getAuthHeaders();
                 const dbUpdates = {
@@ -133,14 +162,27 @@ class FitTrackAPI {
                 });
                 if (res.ok) {
                     const data = await res.json();
-                    return { ...data, fullName: data.full_name, height: data.height_cm, weight: data.weight_kg };
+                    this.userCache = { ...data, fullName: data.full_name, height: data.height_cm, weight: data.weight_kg };
+                    return this.userCache;
                 }
             } catch (e) {
                 console.error('Update failed on backend, falling back...');
             }
         }
 
-        // Direct fallback omitted but functionally similar to getCurrentUser logic
+        // Direct Fallback
+        const user = await this.getCurrentUser();
+        const dbUpdates = {
+            full_name: updates.fullName,
+            height_cm: updates.height,
+            weight_kg: updates.weight,
+            fitness_goal: updates.fitnessGoal,
+            daily_cal_goal: this.calculateDailyCalorieGoal(updates.weight, updates.height, updates.fitnessGoal)
+        };
+        const { data, error } = await supabaseClient.from('users').update(dbUpdates).eq('id', user.id).select().single();
+        if (error) throw error;
+        this.userCache = { ...data, fullName: data.full_name, height: data.height_cm, weight: data.weight_kg };
+        return this.userCache;
     }
 
     calculateDailyCalorieGoal(weight, height, goal) {

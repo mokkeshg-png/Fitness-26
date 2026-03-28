@@ -1,20 +1,8 @@
 // js/food-database.js
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // Render foods immediately
-    renderFoods(foodDatabase);
-
-    // Then update user info if logged in
-    try {
-        const user = await api.getCurrentUser();
-        if(user && document.getElementById('userAvatar')) {
-            document.getElementById('userAvatar').innerText = user.fullName.charAt(0).toUpperCase();
-        }
-    } catch (e) {
-        console.error('User fetch failed:', e);
-    }
-
-    const foodDatabase = [
+    // 1. Define foodDatabase first
+    const rawFoodData = [
         // PROTEINS
         { 
             name: "Chicken", category: "protein", base_calories: 165, goal: "loss", 
@@ -177,7 +165,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             unit: "per 100g or 2 slices", 
             variations: [{type: "Whole Wheat", cal: 247}, {type: "White Bread", cal: 265}, {type: "Ezekiel Sprouted", cal: 240}] 
         },
-
+ 
         // FRUITS & VEG
         { 
             name: "Banana", category: "fruits", base_calories: 89, goal: "gain", 
@@ -236,7 +224,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             unit: "per cup", 
             variations: [{type: "Plain Greens", cal: 15}, {type: "With Vinaigrette", cal: 80}, {type: "Caesar Salad", cal: 220}] 
         },
-
+ 
         // HEALTHY FATS / MISC
         { 
             name: "Milk", category: "protein", base_calories: 60, goal: "both", 
@@ -291,7 +279,22 @@ document.addEventListener('DOMContentLoaded', async () => {
             details: "A healthy way to fulfill craving and add dense calories with magnesium.", 
             unit: "per 100g" 
         }
-    ].map(f => ({ ...f, image: `https://images.unsplash.com/photo-${getFoodImgId(f.name.toLowerCase())}?auto=format&fit=crop&w=400&q=80` }));
+    ];
+
+    const foodDatabase = rawFoodData.map(f => ({ ...f, image: `https://images.unsplash.com/photo-${getFoodImgId(f.name.toLowerCase())}?auto=format&fit=crop&w=400&q=80` }));
+
+    // 2. Render foods AFTER definition
+    renderFoods(foodDatabase);
+
+    // 3. Update user info if logged in
+    try {
+        const user = await api.getCurrentUser();
+        if(user && document.getElementById('userAvatar')) {
+            document.getElementById('userAvatar').innerText = user.fullName.charAt(0).toUpperCase();
+        }
+    } catch (e) {
+        console.error('User fetch failed:', e);
+    }
 
     // Helper to get consistent but relevant images from unsplash based on common food names
     function getFoodImgId(name) {

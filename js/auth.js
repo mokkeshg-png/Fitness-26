@@ -97,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
             btn.disabled = true;
 
             try {
-                await api.register({
+                const result = await api.register({
                     fullName,
                     email,
                     password,
@@ -106,10 +106,27 @@ document.addEventListener('DOMContentLoaded', () => {
                     fitnessGoal
                 });
                 
-                showNotification('Account created successfully!', 'success');
-                setTimeout(() => window.location.href = 'dashboard.html', 800);
+                if (result.needsConfirmation) {
+                    showNotification('Account created! Please check your email to confirm and log in.', 'info');
+                    alert('Confirmation Required: Please check your email inbox to confirm your account before logging in.');
+                    // Don't redirect yet if they need to confirm
+                    btn.innerHTML = 'Create Account <i class="fa-solid fa-user-plus"></i>';
+                    btn.disabled = false;
+                } else {
+                    showNotification('Account created successfully!', 'success');
+                    setTimeout(() => window.location.href = 'dashboard.html', 800);
+                }
             } catch (error) {
-                showNotification(error.message, 'error');
+                let errorMessage = error.message || 'An unexpected error occurred during signup.';
+                if (errorMessage.includes('rate limit')) {
+                    errorMessage = 'Email rate limit exceeded. Please wait a few minutes or use a different email address.';
+                } else if (errorMessage.includes('already registered')) {
+                    errorMessage = 'This email is already registered. Please log in instead.';
+                }
+                
+                console.error('Registration Catch:', errorMessage);
+                alert(errorMessage);
+                showNotification(errorMessage, 'error');
                 btn.innerHTML = 'Create Account <i class="fa-solid fa-user-plus"></i>';
                 btn.disabled = false;
             }
