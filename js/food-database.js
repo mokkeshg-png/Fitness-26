@@ -291,7 +291,40 @@ document.addEventListener('DOMContentLoaded', async () => {
             details: "A healthy way to fulfill craving and add dense calories with magnesium.", 
             unit: "per 100g" 
         }
-    ];
+    ].map(f => ({ ...f, image: `https://images.unsplash.com/photo-${getFoodImgId(f.name.toLowerCase())}?auto=format&fit=crop&w=400&q=80` }));
+
+    // Helper to get consistent but relevant images from unsplash based on common food names
+    function getFoodImgId(name) {
+        if(name.includes('chicken')) return '1632778144458-bf88d19808d7';
+        if(name.includes('egg')) return '1518492104633-c3ed9e75466a';
+        if(name.includes('salmon')) return '1499125562588-29fb8a56b5d5';
+        if(name.includes('yogurt')) return '1488477026958-9853962b9319';
+        if(name.includes('beef')) return '1551028150-64b9f398f678';
+        if(name.includes('tofu')) return '1546069901-ba9599a7e63c';
+        if(name.includes('cheese')) return '1486297678162-ad2b19b664de';
+        if(name.includes('tuna')) return '1504674900247-0877df9cc836';
+        if(name.includes('protein')) return '1593095948071-474c5cc2989d';
+        if(name.includes('turkey')) return '1511261314352-0941544a86b1';
+        if(name.includes('rice')) return '1512058560366-cd2429598aee';
+        if(name.includes('potato')) return '1518977676601-b53f82aba655';
+        if(name.includes('oatmeal') || name.includes('oat')) return '1501707315855-3837889e4745';
+        if(name.includes('quinoa')) return '1515942400420-2b9c3e59f29f';
+        if(name.includes('pasta')) return '1473093226795-af9932fe5856';
+        if(name.includes('bread')) return '1509440159596-0249088772ff';
+        if(name.includes('banana')) return '1571771894821-ad9b588646b7';
+        if(name.includes('blueberry')) return '1497534446932-c94c44f66a33';
+        if(name.includes('avocado')) return '1523049197027-0477020bc33d';
+        if(name.includes('broccoli')) return '1452948491414-729864273df3';
+        if(name.includes('spinach')) return '1540420773420-3366772fec0a';
+        if(name.includes('apple')) return '1560806887-1e4cd316bd6b';
+        if(name.includes('salad')) return '1512621776951-a57141f2eefd';
+        if(name.includes('milk')) return '1517315003714-a10c7104b901';
+        if(name.includes('almond')) return '1511221370220-4107147cfd72';
+        if(name.includes('peanut')) return '1590429780004-9eb431d102e3';
+        if(name.includes('oil')) return '1475332432029-ea3265b4c1aa';
+        if(name.includes('seed')) return '1523315844889-13e0051187d9';
+        return '1546069901-e6d1949195b2';
+    }
 
     const grid = document.getElementById('foodGrid');
     const searchInput = document.getElementById('searchInput');
@@ -356,17 +389,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             card.innerHTML = `
-                <div class="food-category-tag ${catClass}">${catTag}</div>
-                <h3 class="food-name">${food.name}</h3>
-                ${smartTagsHtml}
-                ${caloriesHtml}
-                <p class="food-benefit">${food.benefit}</p>
-                <div style="background: rgba(0,0,0,0.02); padding: 10px; border-radius: 6px; margin-bottom: 15px;">
-                    ${eatTimeHtml}
-                    ${warningHtml}
+                <div class="food-img-container">
+                    <img src="${food.image}" loading="lazy" alt="${food.name}">
+                    <div class="food-category-tag ${catClass}">${catTag}</div>
                 </div>
-                <div class="food-goal-tags">
-                    ${goalHtml}
+                <div class="food-card-body">
+                    <div style="display:flex; justify-content:space-between; align-items:start;">
+                        <h3 class="food-name">${food.name}</h3>
+                        <div class="food-calories">${food.base_calories} <span style="font-size:0.8rem; font-weight:normal;">kcal</span></div>
+                    </div>
+                    ${smartTagsHtml}
+                    <p class="food-benefit">${food.benefit.substring(0, 60)}...</p>
+                    <div class="food-footer">
+                        <span class="food-unit">${food.unit}</span>
+                        ${goalHtml}
+                    </div>
                 </div>
             `;
 

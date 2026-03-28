@@ -1,4 +1,4 @@
-   import os
+import os
 from datetime import datetime
 from typing import List, Optional
 
@@ -192,22 +192,17 @@ async def calculate_bmi(user = Depends(get_user_from_token)):
     return {"bmi": round(bmi, 1), "category": category}
 
 @app.get("/analytics/history")
-async def get_history(days: int = 30, user = Depends(get_user_from_token)):
+async def get_analytics_history(days: int = 30, user = Depends(get_user_from_token)):
     from datetime import timedelta
-    end_date = datetime.utcnow()
-    start_date = end_date - timedelta(days=days)
+    start_date = (datetime.utcnow() - timedelta(days=days)).isoformat()
+    food_logs = supabase.table("food_logs").select("calories, consumed_at").eq("user_id", user.id).gte("consumed_at", start_date).execute()
+    workouts = supabase.table("workouts").select("calories_burned, completed_at").eq("user_id", user.id).gte("completed_at", start_date).execute()
+    weight_logs = supabase.table("weight_logs").select("weight_kg, logged_at").eq("user_id", user.id).gte("logged_at", start_date).order("logged_at").execute()
     
-    # Fetch food logs for period
-    food_resp = supabase.table("food_logs").select("calories, consumed_at").eq("user_id", user.id)\
-        .gte("consumed_at", start_date.isoformat()).execute()
-    
-    # Fetch workouts for period
-    workout_resp = supabase.table("workouts").select("calories_burned, completed_at").eq("user_id", user.id)\
-        .gte("completed_at", start_date.isoformat()).execute()
-        
     return {
-        "food_logs": food_resp.data,
-        "workouts": workout_resp.data
+        "food_logs": food_logs.data,
+        "workouts": workouts.data,
+        "weight_logs": weight_logs.data
     }
 
 if __name__ == "__main__":

@@ -21,9 +21,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 async function loadDashboardData(date, user) {
-    const summary = await api.getDailySummary(date);
-    const foods = await api.getFoodLogs(date);
-    const workouts = await api.getWorkouts(date);
+    // Parallelize API calls for better performance
+    const [summary, foods, workouts] = await Promise.all([
+        api.getDailySummary(date),
+        api.getFoodLogs(date),
+        api.getWorkouts(date)
+    ]);
 
     // Update Calorie Card
     document.getElementById('netCalories').innerText = summary.net_calories;

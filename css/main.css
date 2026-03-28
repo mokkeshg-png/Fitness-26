@@ -12,15 +12,15 @@
   --success: hsl(150, 70%, 45%);
   --warning: hsl(35, 90%, 55%);
   --danger: hsl(350, 80%, 60%);
-  --radius-sm: 8px;
-  --radius: 16px;
-  --radius-lg: 24px;
-  --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  --font-main: 'Inter', sans-serif;
+  --radius-sm: 10px;
+  --radius: 18px;
+  --radius-lg: 28px;
+  --transition: 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --font-main: 'Inter', system-ui, -apple-system, sans-serif;
   --font-heading: 'Outfit', sans-serif;
-  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.03);
-  --shadow: 0 12px 32px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 24px 48px rgba(0, 0, 0, 0.1);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.12);
   --glass-bg: rgba(255, 255, 255, 0.85);
   --glass-border: rgba(255, 255, 255, 0.4);
 }
@@ -108,8 +108,9 @@ img {
 }
 
 .btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 24px hsla(250, 80%, 65%, 0.4);
+  transform: translateY(-1px);
+  filter: brightness(1.1);
+  box-shadow: 0 8px 20px hsla(250, 80%, 65%, 0.4);
 }
 
 .btn-outline {
@@ -131,19 +132,17 @@ img {
 }
 
 .glass-panel {
-  background: var(--glass-bg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--glass-border);
+  background: var(--surface);
+  border: 1px solid rgba(150, 150, 150, 0.08);
   border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-sm);
 }
 
 /* Animations */
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -152,7 +151,8 @@ img {
 }
 
 .animate-fade-in-up {
-  animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  animation: fadeInUp 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+  will-change: transform, opacity;
 }
 
 /* Form Elements */
@@ -249,6 +249,7 @@ select.form-control option {
 .brand-icon {
   background: linear-gradient(135deg, var(--primary), var(--secondary));
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   font-size: 1.8rem;
 }

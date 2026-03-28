@@ -5,18 +5,18 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 20px;
-    background: radial-gradient(circle at top left, var(--bg-color), rgba(110, 86, 207, 0.05));
+    padding: 24px;
+    background: #f8f9fb;
 }
 
 .auth-card {
     width: 100%;
-    max-width: 450px;
-    padding: 40px;
+    max-width: 440px;
+    padding: 48px 40px;
     background: var(--surface);
     border-radius: var(--radius);
-    box-shadow: var(--shadow-lg);
-    border: 1px solid var(--glass-border);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(150, 150, 150, 0.1);
 }
 
 .auth-card.wide {

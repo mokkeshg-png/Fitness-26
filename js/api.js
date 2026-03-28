@@ -289,8 +289,13 @@ class FitTrackAPI {
 
         const { data: foods } = await supabaseClient.from('food_logs').select('calories, consumed_at').eq('user_id', user.id).gte('consumed_at', isoStart);
         const { data: workouts } = await supabaseClient.from('workouts').select('calories_burned, completed_at').eq('user_id', user.id).gte('completed_at', isoStart);
+        const { data: weights } = await supabaseClient.from('weight_logs').select('weight_kg, logged_at').eq('user_id', user.id).gte('logged_at', isoStart);
         
-        return { food_logs: foods || [], workouts: workouts || [] };
+        return { 
+            food_logs: foods || [], 
+            workouts: workouts || [],
+            weight_logs: weights || []
+        };
     }
 }
 

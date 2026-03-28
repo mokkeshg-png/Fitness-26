@@ -19,10 +19,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Process Data
     const calorieData = processHistoricalCalories(history.food_logs, dates, days);
     const workoutData = processHistoricalWorkouts(history.workouts, dates, days);
-    
-    // Weight data is still currently mock until weight_logs table is integrated, 
-    // but we can use the current weight as the latest point
-    const weightTrend = generateWeightData(user.weight, days, user.fitnessGoal);
+    const weightTrend = processHistoricalWeights(history.weight_logs, dates, days, user.weight);
 
     // Initialize Charts
     initWeightChart(dates, weightTrend);
@@ -58,6 +55,28 @@ function processHistoricalWorkouts(logs, labels, days) {
             data[days - 1 - diffDays] += parseInt(log.calories_burned);
         }
     });
+    return data;
+}
+
+function processHistoricalWeights(logs, labels, days, currentWeight) {
+    const data = new Array(days).fill(null);
+    const today = new Date();
+    
+    logs.forEach(log => {
+        const logDate = new Date(log.logged_at);
+        const diffTime = Math.abs(today - logDate);
+        const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+        if (diffDays < days) {
+            data[days - 1 - diffDays] = parseFloat(log.weight_kg);
+        }
+    });
+
+    // Fill gaps for a prettier line
+    let lastWeight = currentWeight;
+    for(let i = days - 1; i >= 0; i--) {
+        if (data[i] === null) data[i] = lastWeight;
+        else lastWeight = data[i];
+    }
     return data;
 }
 

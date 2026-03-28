@@ -8,45 +8,45 @@
 }
 
 .dash-card {
+    background: var(--surface);
     border-radius: var(--radius);
-    padding: 30px;
-    color: white;
+    padding: 24px;
+    color: var(--text-dark);
     position: relative;
     overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    border-top: 4px solid var(--primary);
+    transition: all var(--transition);
+}
+
+.dash-card:hover {
+    transform: translateY(-4px);
     box-shadow: var(--shadow);
 }
 
 .dash-card::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 150px;
-    height: 150px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 50%;
-    transform: translate(30%, -30%);
+    display: none;
 }
 
 .primary-gradient {
-    background: linear-gradient(135deg, var(--primary), #8e80f5);
+    border-top-color: var(--primary);
 }
 
 .secondary-gradient {
-    background: linear-gradient(135deg, var(--secondary), #f56b9c);
+    border-top-color: var(--secondary);
 }
 
 .card-icon {
-    font-size: 2rem;
-    margin-bottom: 20px;
-    background: rgba(255, 255, 255, 0.2);
-    width: 60px;
-    height: 60px;
+    font-size: 1.5rem;
+    margin-bottom: 16px;
+    background: var(--bg-color);
+    width: 50px;
+    height: 50px;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 16px;
-    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    color: var(--primary);
 }
 
 .dash-card h3 {
@@ -66,7 +66,7 @@
 .progress-bar-wrap {
     width: 100%;
     height: 6px;
-    background: rgba(255, 255, 255, 0.3);
+    background: var(--bg-color);
     border-radius: 10px;
     margin-bottom: 12px;
     overflow: hidden;
@@ -74,9 +74,9 @@
 
 .progress-bar {
     height: 100%;
-    background: white;
+    background: var(--primary);
     border-radius: 10px;
-    transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: width 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .card-status {
